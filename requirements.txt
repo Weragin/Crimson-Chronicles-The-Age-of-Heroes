@@ -1,2 +1,2 @@
-numpy == 1.26
-tkinter == 
+numpy==1.26
+ruff==0.1.9
