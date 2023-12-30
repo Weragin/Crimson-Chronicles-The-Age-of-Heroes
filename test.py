@@ -20,7 +20,6 @@ def Warrior(e):
         army_add(warrior, small_warrior)
 
 
-
 def Knight(e):
     global money
     if money > 120:
