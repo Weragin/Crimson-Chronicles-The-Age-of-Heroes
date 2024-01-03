@@ -16,7 +16,7 @@ def next(e = 0):
     str_army = json.dumps(army)
     str_unit_stats = json.dumps(unit_stats)
     root.withdraw()
-    subprocess.run(["python", "battle.py", str_army, str_unit_stats])
+    subprocess.run(["python", "battle.py", str_army, str_unit_stats, str(WIDTH), str(HEIGHT)])
     sys.exit()
 
 
@@ -36,7 +36,7 @@ def Knight(e):
         money -= 120
         army.append(["knight", []])
         canvas.itemconfig(money_text, text = money)
-        army_add(knight)
+        army_add(knight, small_knight)
 
 
 def Vampire(e):
@@ -45,7 +45,7 @@ def Vampire(e):
         money -= 140
         army.append(["vampire", []])
         canvas.itemconfig(money_text, text = money)
-        army_add(vampire)
+        army_add(vampire, small_vampire)
 
 
 def Defender(e):
@@ -54,7 +54,7 @@ def Defender(e):
         money -= 130
         army.append(["defender", []])
         canvas.itemconfig(money_text, text = money)
-        army_add(defender)
+        army_add(defender, small_defender)
 
 
 def Healer(e):
@@ -83,9 +83,9 @@ def army_add(unit, img = None):
     height = 50
     if img == None:
         color = canvas.itemcget(object_tag, "fill")
-        temp.append(canvas.create_rectangle(place, tag_height * 3 + 60, place + 20, tag_height * 3 + 80, fill=color, tags=("army")))
+        temp.append(canvas.create_rectangle(place + 100, tag_height * 3 + 10, place + 120, tag_height * 3 + 30, fill=color, tags=("army")))
     else:
-        temp.append(canvas.create_image(place, tag_height * 3 + 60, image = img, anchor = tk.NW, tags=("army")))
+        temp.append(canvas.create_image(place + 100, tag_height * 3 + 10, image = img, anchor = tk.NW, tags=("army")))
     army[-1].append(temp[-1])
 
 
@@ -137,15 +137,34 @@ def add_weapon(e):
 
 
 def character_create(x1, y1, x2, y2, stats: list, img = None):
+    global icon_tags
     num = 200//6
     if img == None:
         character = canvas.create_rectangle(x1, y1, x2, y2, fill="red")
     else:
         character = canvas.create_image(x1, y1, image = img, anchor = tk.NW, tags="images")
     for i in range(len(stats)):
-        canvas.create_rectangle(x2, y1 + num * i, x2 + num, y1 + num * (i + 1), fill="red")
+        canvas.create_image(x2, y1 + num * i, image = icon_tags[i], anchor = 'nw')
         canvas.create_text(x2 + 2 * num, y1 + num * i + num//2, text=stats[i], font=('Helvetica 20 bold'))
     return character
+
+
+def weapon_create(x1, y1, x2 = None, y2 = None, stats = [0, 0, 0, 0, 0, 0], img = None):
+    global HEIGHT, WIDTH, tag_width, small_icon_tags
+    s = ["hp", "atk", "def", "vamp", "heal", "cost"]
+    stats[3] = str(stats[3]*100)+'%'
+    num = (y2 - y1)//2
+    if img == None:
+        weapon = canvas.create_rectangle(x1, y1, x2, y2, fill="yellow", tags="weapons")
+    else:
+        weapon = canvas.create_image(x1, y1, image = img, anchor = 'nw', tags = "weapons")
+    for i in range(2):
+        for j in range(3):
+            # canvas.create_rectangle(x2 + num * i * 2.5, y1 + num * j, x2 + num * (i+1) + num * i * 1.5, y1 + num * (j+1), fill="red")
+            canvas.create_image(x2 + num * i * 2.5, y1 + num * j, image = small_icon_tags[j+3*i], anchor = 'nw')
+            canvas.create_text(x2 + num * (i + 1.7) + num * i * 2, (y1 + y2)//2 - (y2 - y1)//4 + num * j, text=stats[j+3*i], font=("Helvetica 16 bold"))
+    stats[3] = float(stats[3][0:-1])/100
+    return weapon
 
 
 def canvas_size(e):
@@ -166,12 +185,34 @@ small_warrior = warrior_img.resize((W, H))
 small_warrior = ImageTk.PhotoImage(small_warrior)
 tk_warrior_img = ImageTk.PhotoImage(warrior_img)
 
+knight_img = Image.open("pictures/knight.png")
+tk_knight_img = ImageTk.PhotoImage(knight_img)
+small_knight = knight_img.resize((W, H))
+small_knight = ImageTk.PhotoImage(small_knight)
+
+vampire_img = Image.open("pictures/vampire.png")
+tk_vampire_img = ImageTk.PhotoImage(vampire_img)
+small_vampire = vampire_img.resize((W, H))
+small_vampire = ImageTk.PhotoImage(small_vampire)
+
+defender_img = Image.open("pictures/defender.png")
+tk_defender_img = ImageTk.PhotoImage(defender_img)
+small_defender = defender_img.resize((W, H))
+small_defender = ImageTk.PhotoImage(small_defender)
+
+icon_names = ["pictures/icons/heart.png", "pictures/icons/attack.png", "pictures/icons/defense.png", "pictures/icons/vampirsm.png", "pictures/icons/heal.png", "pictures/icons/price.png"]
+icon_tags = []
+small_icon_tags = []
+for i in icon_names:
+    icon_img = Image.open(i)
+    icon_tags.append(ImageTk.PhotoImage(icon_img))
+    small_icon = icon_img.resize((25, 25))
+    small_icon_tags.append(ImageTk.PhotoImage(small_icon))
+
 canvas = tk.Canvas(root, bg='white', highlightthickness=0)
 canvas.pack(fill=tk.BOTH, expand=True)
 WIDTH = int(sys.argv[1])
 HEIGHT = int(sys.argv[2])
-# canvas.bind('<Configure>', canvas_size)
-
 
 exit_button = tk.Button(root, text='EXIT', command=close, width=5)
 exit_button.place(x = WIDTH - 50, y = 0)
@@ -187,39 +228,36 @@ tag_height = HEIGHT//3 - 50
 x = 50
 y = 100
 unit_stats = {"warrior": [100, 5, 2, 0, 0, 90], "knight": [120, 7, 2, 0, 0, 100], "vampire": [140, 5, 2, 5, 0, 80], "defender": [130, 5, 5, 0, 0, 150], "healer": [135, 0, 2, 0, 5, 80], "lancer": [120, 7, 2, 0, 0, 90]}
-warrior = character_create(tag_width - x, tag_height - y, tag_width + x, tag_height + y, unit_stats["warrior"], tk_warrior_img)
+warrior = character_create(x, tag_height - y, 3 * x, tag_height + y, unit_stats["warrior"], tk_warrior_img)
 canvas.tag_bind(warrior, "<ButtonPress-1>", Warrior)
 
-knight = character_create(tag_width*2 - x, tag_height - y, tag_width*2 + x, tag_height + y, unit_stats["knight"], None)
+knight = character_create(tag_width, tag_height - y, tag_width + 2*x, tag_height + y, unit_stats["knight"], tk_knight_img)
 canvas.tag_bind(knight, "<ButtonPress-1>", Knight)
 
-vampire = character_create(tag_width*3 - x, tag_height - y, tag_width*3 + x, tag_height + y, unit_stats["vampire"], None)
+vampire = character_create(tag_width*2 - x, tag_height - y, tag_width*2 + x, tag_height + y, unit_stats["vampire"], tk_vampire_img)
 canvas.tag_bind(vampire, "<ButtonPress-1>", Vampire)
 
-defender = character_create(tag_width - x, tag_height * 2 - y + 50, tag_width + x, tag_height * 2 + y + 50, unit_stats["defender"], None)
+defender = character_create(x, tag_height * 2 - y + 50, 3 * x, tag_height * 2 + y + 50, unit_stats["defender"], tk_defender_img)
 canvas.tag_bind(defender, "<ButtonPress-1>", Defender)
 
-healer = character_create(tag_width*2 - x, tag_height * 2 - y + 50, tag_width*2 + x, tag_height * 2 + y + 50, unit_stats["healer"], None)
+healer = character_create(tag_width, tag_height * 2 - y + 50, tag_width + 2*x, tag_height * 2 + y + 50, unit_stats["healer"], None)
 canvas.tag_bind(healer, "<ButtonPress-1>", Healer)
 
-lancer = character_create(tag_width*3 - x, tag_height * 2 - y + 50, tag_width*3 + x, tag_height * 2 + y + 50, unit_stats["lancer"], None)
+lancer = character_create(tag_width*2 - x, tag_height * 2 - y + 50, tag_width*2 + x, tag_height * 2 + y + 50, unit_stats["lancer"], None)
 canvas.tag_bind(lancer, "<ButtonPress-1>", Lancer)
 
-canvas.create_line(0, tag_height * 3, WIDTH, tag_height * 3)
-canvas.create_text(60, tag_height*3 + 30, text="ARMY", fill="black", font=('Helvetica 30 bold'))
+canvas.create_line(0, tag_height * 3 - 25, WIDTH, tag_height * 3 - 25)
+canvas.create_text(60, tag_height*3, text="ARMY", fill="black", font=('Helvetica 30 bold'))
 
 weapons = {}
 spacing = WIDTH//6
-sword = canvas.create_rectangle(WIDTH//2, tag_height*3 + 20, WIDTH//2 + 20, tag_height*3 + 40, fill="orange", tags="weapons")
-weapons[sword] = [5, 2, 0, 0, 0, 50]
-shield = canvas.create_rectangle(WIDTH//2 + spacing, tag_height*3 + 20, WIDTH//2 + spacing + 20, tag_height*3 + 40, fill="brown", tags="weapons")
-weapons[shield] = [20, -1, 2, 0, 0, 50]
-greatAxe = canvas.create_rectangle(WIDTH//2 + 2*spacing, tag_height*3 + 20, WIDTH//2 + 2*spacing + 20, tag_height*3 + 40, fill="magenta", tags="weapons")
-weapons[greatAxe] = [-15, 5, -2, 0.1, 0, 70]
-katana = canvas.create_rectangle(WIDTH//2, tag_height*3 + 100, WIDTH//2 + 20, tag_height*3 + 120, fill="grey", tags="weapons")
-weapons[katana] = [-20, 6, -5, 0.5, 0, 100]
-magicWand = canvas.create_rectangle(WIDTH//2 + spacing, tag_height * 3 + 100, WIDTH//2 + spacing + 20, tag_height*3 + 120, fill="purple", tags="weapons")
-weapons[magicWand] = [30, 3, 0, 0, 3, 80]
+hspace = (HEIGHT - tag_height)//5
+wx1 = tag_width * 3 - x//2
+wx2 = tag_width * 3 + x//2
+weapon_stats = [[5, 2, 0, 0, 0, 50], [20, -1, 2, 0, 0, 50], [-15, 5, -2, 0.1, 0, 70], [-20, 6, -5, 0.5, 0, 100], [30, 3, 0, 0, 3, 80]]
+for i in range(5):
+    temp = weapon_create(wx1, 25 + i*hspace, wx2, 75 + hspace*i, weapon_stats[i])
+    weapons[temp] = weapon_stats[i]
 
 canvas.tag_bind("weapons", "<ButtonPress-1>", add_weapon)
 

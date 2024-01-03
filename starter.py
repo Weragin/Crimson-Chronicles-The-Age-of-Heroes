@@ -27,6 +27,6 @@ exit_button.place(x= 1280//2, y=694//2)
 
 root.mainloop()
 
-print(WIDTH, HEIGHT)
+root.withdraw()
 subprocess.run(["python", "build_army.py", str(WIDTH), str(HEIGHT)])
 sys.exit()
