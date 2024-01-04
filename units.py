@@ -1,4 +1,4 @@
-from typing import Tuple, List, Iterable
+from typing import Tuple, List
 
 
 # py.checkio Warriors
@@ -27,7 +27,7 @@ class Unit:
         for key, value in kwargs.items():
             setattr(self, key, value)
 
-    def hit(self, targets: Iterable["Unit", ...]) -> Tuple[int, int, int]:
+    def hit(self, targets: List["Unit"]) -> Tuple[int, int, int]:
         """
         Handles the event of a unit beeing called as an attacker.
 
@@ -90,7 +90,7 @@ class Defender(Unit):
         Unit.__init__(self, name, cost=12, health=60, attack=3, defence=2)
 
     def on_attacked(self, damage):
-        Unit.on_attacked(self, damage - self.defence)
+        return Unit.on_attacked(self, damage - self.defence)
 
 
 class Lancer(Unit):
@@ -105,7 +105,8 @@ class Lancer(Unit):
 
     def hit(self, targets: List[Unit]):
         """
-        
+        Attacks all oposing units.
+        :param targets: Iterable[Unit, ...]: An array of Units that might be targeted
         """
         for target in targets:
-            Unit.hit(self, target)
+            target.on_attacked(self.attack)
