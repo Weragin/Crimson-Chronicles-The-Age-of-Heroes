@@ -59,8 +59,8 @@ def Defender(e):
 
 def Healer(e):
     global money
-    if money >= 135:
-        money -= 135
+    if money >= 100:
+        money -= 100
         army.append(["healer", []])
         canvas.itemconfig(money_text, text = money)
         army_add(healer, small_healer)
@@ -237,7 +237,7 @@ tag_height = HEIGHT//3 - 50
 
 x = 50
 y = 100
-unit_stats = {"warrior": [100, 5, 2, 0, 0, 90], "knight": [120, 7, 2, 0, 0, 100], "vampire": [140, 5, 2, 5, 0, 80], "defender": [130, 5, 5, 0, 0, 150], "healer": [135, 0, 2, 0, 5, 80], "lancer": [120, 7, 2, 0, 0, 90]}
+unit_stats = {"warrior": [100, 5, 2, 0, 0, 90], "knight": [120, 7, 2, 0, 0, 100], "vampire": [140, 5, 2, 5, 0, 80], "defender": [130, 5, 5, 0, 0, 150], "healer": [135, 0, 2, 0, 5, 100], "lancer": [120, 7, 2, 0, 0, 90]}
 warrior = character_create(x, tag_height - y, 3 * x, tag_height + y, unit_stats["warrior"], tk_warrior_img)
 canvas.tag_bind(warrior, "<ButtonPress-1>", Warrior)
 

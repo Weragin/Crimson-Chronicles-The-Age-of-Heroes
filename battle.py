@@ -84,12 +84,23 @@ class Attack:
             # self.move_from()
     
     def attakcing(self):
+        global my_unit, enemy_unit
         self.atttack_animation()
         tags = canvas.itemcget(self.defender, 'tags').split(' ')
         items = canvas.find_withtag(tags[1])
         dmg = random.randint(5, 10)
         hp = canvas.itemcget(items[-1], 'text')
         canvas.itemconfig(items[-1], text = int(hp) - dmg)
+        if int(canvas.itemcget(items[-1], 'text')) <= 0:
+            canvas.itemconfig(self.defender, image = tk_death_icon)
+            if self.enemy == -1:
+                my_army_tags_alive.remove(self.defender)
+                my_unit = None
+            else:
+                enemy_army_tags_alive.remove(self.defender)
+                enemy_unit = None
+                print(enemy_army_tags_alive)
+                print(self.defender)
         self.attacking_move = 0
 
     def atttack_animation(self):
@@ -195,14 +206,18 @@ class Attack:
 
 def attacking_unit(e):
     global my_turn, my_unit
-    print("attacking unit selected")
-    my_unit = canvas.find_overlapping(e.x, e.y, e.x+1, e.y+1)[1]
+    temp = canvas.find_overlapping(e.x, e.y, e.x+1, e.y+1)[1]
+    if canvas.itemcget(temp, 'image') != str(tk_death_icon):
+        my_unit = temp
+        print("attacking unit selected")
 
 
 def defending_unit(e):
     global enemy_unit, my_turn
-    print("defending unit selected")
-    enemy_unit = canvas.find_overlapping(e.x, e.y, e.x+1, e.y+1)[1]
+    temp = canvas.find_overlapping(e.x, e.y, e.x+1, e.y+1)[1]
+    if canvas.itemcget(temp, 'image') != str(tk_death_icon):
+        enemy_unit = temp
+        print("defending unit selected")
 
 
 def attack(e):
@@ -218,8 +233,8 @@ def attack(e):
 
 def enemy_attack():
     global my_turn, running_animation
-    attacker = random.choice(enemy_army_tags)
-    defender = random.choice(my_army_tags)
+    attacker = random.choice(enemy_army_tags_alive)
+    defender = random.choice(my_army_tags_alive)
     atk = Attack(attacker, defender)
     atk.animate()
     my_turn = True
@@ -288,8 +303,10 @@ print(unit_stats)
 # stats- hp, atk, def, vamp, heal, cost
 
 my_army_tags = create_army(army, WIDTH//4)
+my_army_tags_alive = [i for i in my_army_tags]
 enemy_army = [['vampire', [[-15, 5, -2, 0.1, 0, 70]]], ['vampire', [[-15, 5, -2, 0.1, 0, 70]]], ['vampire', []], ['knight', []]]
 enemy_army_tags = create_army(enemy_army, WIDTH//4 * 3 - size[0])
+enemy_army_tags_alive = [i for i in enemy_army_tags]
 
 my_turn = True
 my_unit = None
