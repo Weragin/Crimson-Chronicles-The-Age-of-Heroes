@@ -68,7 +68,6 @@ class Attack:
 
     def move_to(self):
         tag = canvas.itemcget(self.attacker, 'tags').split(' ')
-        print(tag)
         tag = tag[1]
         canvas.move(tag, self.dx/20, self.dy/20)
         self.steps -= 1
@@ -118,6 +117,61 @@ class Attack:
         # vrati sa na miesto
         # zmen obrazok na idle lancer
         # WIDTH//4 * 3 - size[0] * 2
+        self.dxl = WIDTH//4 * 3 - size[0] * 2 - self.atk_coords[0]
+        self.dyl = HEIGHT - size[1] - 20 - self.atk_coords[1]
+        self.return_x = self.atk_coords[0] - (WIDTH//4 * 3 - size[0] * 2)
+        self.return_y = self.atk_coords[1] - 30
+        print(self.return_y)
+        self.atk_dy = HEIGHT - 50 - size[1]
+        self.lancer_move_to()
+
+    def lancer_move_to(self):
+        tag = canvas.itemcget(self.attacker, 'tags').split(' ')
+        tag = tag[1]
+        canvas.move(tag, self.dxl/20, self.dyl/20)
+        self.steps -= 1
+        if self.steps > 0:
+            canvas.after(50, self.lancer_move_to)
+        else:
+            self.steps = 20
+            self.lancer_attack()
+    
+    def lancer_attack(self):
+        # zmeni sa na motorku hore
+        tag = canvas.itemcget(self.attacker, 'tags').split(' ')
+        tag = tag[1]
+        canvas.move(tag, 0, self.atk_dy/-20)
+        self.steps -= 1
+        if self.steps > 0:
+            canvas.after(20, self.lancer_attack)
+        else:
+            self.steps = 20
+            print(canvas.coords(self.attacker))
+            self.lancer_turn_around()
+    
+    def lancer_turn_around(self):
+        # id = str(canvas.itemcget(self.attacker, 'image'))
+        # print(id)
+        # canvas.itemconfig(self.attacker, image = opposite_img[id])
+        # print(canvas.itemcget(self.attacker, 'image'))
+        print("lancer returning")
+        self.lancer_move_from()
+
+    def lancer_move_from(self):
+        tag = canvas.itemcget(self.attacker, 'tags').split(' ')
+        tag = tag[1]
+        canvas.move(tag, self.return_x/20, self.return_y/20)
+        print(self.return_y/20)
+        self.steps -= 1
+        if self.steps > 0:
+            canvas.after(50, self.lancer_move_from)
+        else:
+            self.lancer_turn_back()
+        
+    def lancer_turn_back(self):
+    #     id = canvas.itemcget(self.attacker, 'image')
+    #     img_id = [i for i in opposite_img if str(opposite_img[i]) == id]
+    #     canvas.itemconfig(self.attacker, image = img_id)
         pass
 
 
