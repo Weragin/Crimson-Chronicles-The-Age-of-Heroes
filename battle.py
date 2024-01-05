@@ -60,9 +60,10 @@ class Attack:
     
     def animate(self):
         is_lancer = canvas.itemcget(self.attacker, 'image')
-        if is_lancer != tk_lancer_img:
+        if is_lancer != str(tk_lancer_img):
             self.move_to()
         else:
+            print("lancer attack")
             self.lancer_animate()
 
     def move_to(self):
@@ -168,12 +169,13 @@ defender_img = Image.open("pictures/defender.png").resize(size)
 tk_defender_img = ImageTk.PhotoImage(defender_img)
 healer_img = Image.open("pictures/healer.png").resize(size)
 tk_healer_img = ImageTk.PhotoImage(healer_img)
-
-tk_lancer_img = None
+lancer_img = Image.open("pictures/lancer.png").resize(size)
+tk_lancer_img = ImageTk.PhotoImage(lancer_img)
 
 unit_imgs = {"warrior": tk_warrior_img, "knight": tk_knight_img, "vampire": tk_vampire_img, "defender": tk_defender_img, 'healer': tk_healer_img, "lancer": tk_lancer_img}
 opposite_healer = healer_img.transpose(Image.FLIP_LEFT_RIGHT)
 opposite_healer = ImageTk.PhotoImage(opposite_healer)
+# lancer bude na motorke takze potom dam
 opposite_lancer = None
 opposite_img = {str(tk_warrior_img): tk_warrior_img, str(tk_knight_img): tk_knight_img, str(tk_vampire_img): tk_vampire_img, str(tk_defender_img): tk_defender_img, str(tk_healer_img): opposite_healer, str(tk_lancer_img): opposite_lancer}
 

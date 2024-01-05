@@ -72,7 +72,7 @@ def Lancer(e):
         money -= 120
         army.append(["lancer", []])
         canvas.itemconfig(money_text, text = money)
-        army_add(lancer)
+        army_add(lancer, small_lancer)
 
 
 def army_add(unit, img = None):
@@ -192,6 +192,11 @@ tk_healer_img = ImageTk.PhotoImage(healer_img)
 small_healer = healer_img.resize((W, H))
 small_healer = ImageTk.PhotoImage(small_healer)
 
+lancer_img = Image.open("pictures/lancer.png")
+tk_lancer_img = ImageTk.PhotoImage(lancer_img)
+small_lancer = lancer_img.resize((W, H))
+small_lancer = ImageTk.PhotoImage(small_lancer)
+
 icon_names = ["pictures/icons/heart.png", "pictures/icons/attack.png", "pictures/icons/defense.png", "pictures/icons/vampirsm.png", "pictures/icons/heal.png", "pictures/icons/price.png"]
 icon_tags = []
 small_icon_tags = []
@@ -248,7 +253,7 @@ canvas.tag_bind(defender, "<ButtonPress-1>", Defender)
 healer = character_create(tag_width, tag_height * 2 - y + 50, tag_width + 2*x, tag_height * 2 + y + 50, unit_stats["healer"], tk_healer_img)
 canvas.tag_bind(healer, "<ButtonPress-1>", Healer)
 
-lancer = character_create(tag_width*2 - x, tag_height * 2 - y + 50, tag_width*2 + x, tag_height * 2 + y + 50, unit_stats["lancer"], None)
+lancer = character_create(tag_width*2 - x, tag_height * 2 - y + 50, tag_width*2 + x, tag_height * 2 + y + 50, unit_stats["lancer"], tk_lancer_img)
 canvas.tag_bind(lancer, "<ButtonPress-1>", Lancer)
 
 canvas.create_line(0, tag_height * 3 - 25, WIDTH, tag_height * 3 - 25)
