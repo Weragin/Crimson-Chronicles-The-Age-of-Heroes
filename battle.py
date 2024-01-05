@@ -19,19 +19,28 @@ def create_army(my_army, x):
         spacing2 = (HEIGHT//150 - 1) * 150//(len(my_army) - 3)
         enemy = size[0] + 25 if x > WIDTH//2 else -size[0] - 25
         for i in range(3):
-            army_units.append(canvas.create_image(x, HEIGHT - spacing1 - size[-1] * (i + 0.5) - i * size[-1]//3, image = unit_imgs[my_army[i][0]], anchor = 'nw'))
+            if unit_imgs[my_army[i][0]] == tk_healer_img and enemy1 == "enemy_army":
+                army_units.append(canvas.create_image(x, HEIGHT - spacing1 - size[-1] * (i + 0.5) - i * size[-1]//3, image = opposite_healer, anchor = 'nw'))
+            else:
+                army_units.append(canvas.create_image(x, HEIGHT - spacing1 - size[-1] * (i + 0.5) - i * size[-1]//3, image = unit_imgs[my_army[i][0]], anchor = 'nw'))
             temp_tag = (enemy1, str(army_units[-1]) + 'e')
             canvas.itemconfig(army_units[-1], tags = temp_tag)
             hp_create(army_units[-1], unit_stats[my_army[i][0]][0], temp_tag)
         for i in range(3, len(my_army)):
-            army_units.append(canvas.create_image(x + enemy * 2, HEIGHT - spacing2 - size[-1] * (i + 0.5 - 3) - (i-3) * size[-1]//3, image = unit_imgs[my_army[i][0]], anchor = 'nw'))
+            if unit_imgs[my_army[i][0]] == tk_healer_img and enemy1 == "enemy_army":
+                army_units.append(canvas.create_image(x + enemy * 2, HEIGHT - spacing2 - size[-1] * (i + 0.5 - 3) - (i-3) * size[-1]//3, image = opposite_healer, anchor = 'nw'))
+            else:
+                army_units.append(canvas.create_image(x + enemy * 2, HEIGHT - spacing2 - size[-1] * (i + 0.5 - 3) - (i-3) * size[-1]//3, image = unit_imgs[my_army[i][0]], anchor = 'nw'))
             temp_tag = (enemy1, str(army_units[-1]) + 'e')
             canvas.itemconfig(army_units[-1], tags = temp_tag)
             hp_create(army_units[-1], unit_stats[my_army[i][0]][0], temp_tag)
     else:
         spacing = (HEIGHT//150 - 1) * 150 // len(my_army)
         for i in range(len(my_army)):
-            army_units.append(canvas.create_image(x, HEIGHT - spacing - size[-1] * (i+0.5) - i * size[-1]//3, image = unit_imgs[my_army[i][0]], anchor = 'nw'))
+            if unit_imgs[my_army[i][0]] == tk_healer_img and enemy1 == "enemy_army":
+                army_units.append(canvas.create_image(x, HEIGHT - spacing - size[-1] * (i+0.5) - i * size[-1]//3, image = opposite_healer, anchor = 'nw'))
+            else:
+                army_units.append(canvas.create_image(x, HEIGHT - spacing - size[-1] * (i+0.5) - i * size[-1]//3, image = unit_imgs[my_army[i][0]], anchor = 'nw'))
             temp_tag = (enemy1, str(army_units[-1]) + 'e')
             canvas.itemconfig(army_units[-1], tags = temp_tag)
             hp_create(army_units[-1], unit_stats[my_army[i][0]][0], temp_tag)
@@ -117,14 +126,19 @@ class Attack:
     def turn_around(self):
         canvas.itemconfig(self.attacker, image = self.attacker_img)
         id = str(canvas.itemcget(self.attacker, 'image'))
-        print(id)
-        canvas.itemconfig(self.attacker, image = opposite_img[id])
+        if self.enemy == -1 and self.attacker_img == str(opposite_healer):
+            canvas.itemconfig(self.attacker, image = tk_healer_img)
+        else:
+            canvas.itemconfig(self.attacker, image = opposite_img[id])
         print(canvas.itemcget(self.attacker, 'image'))
         self.move_from()
 
     def turn_back(self):
         id = canvas.itemcget(self.attacker, 'image')
-        img_id = [i for i in opposite_img if str(opposite_img[i]) == id]
+        if self.enemy == -1 and self.attacker_img == str(opposite_healer):
+            img_id = opposite_healer
+        else:
+            img_id = [i for i in opposite_img if str(opposite_img[i]) == id]
         canvas.itemconfig(self.attacker, image = img_id)
 
     def move_from(self):
@@ -274,14 +288,17 @@ opposite_img = {str(tk_warrior_img): tk_warrior_img, str(tk_knight_img): tk_knig
 
 atk_file = ["warrior", "vampire", "knight", "healer", "defender"]
 atk_imgs = {str(tk_warrior_img): [], str(tk_knight_img): [], str(tk_vampire_img): [], str(tk_defender_img): [], str(tk_healer_img): [], str(tk_lancer_img): []}
-enemy_atk_imgs = {str(tk_warrior_img): [], str(tk_knight_img): [], str(tk_vampire_img): [], str(tk_defender_img): [], str(tk_healer_img): [], str(tk_lancer_img): []}
+enemy_atk_imgs = {str(tk_warrior_img): [], str(tk_knight_img): [], str(tk_vampire_img): [], str(tk_defender_img): [], str(opposite_healer): [], str(tk_lancer_img): []}
 for i in atk_file:
     for j in range(3):
         file_name = "pictures/attack/" + i + "_attack/" + i + '_' + str(j + 1) + ".png"
         atk_image = Image.open(file_name).resize((128 ,160))
         atk_imgs[str(unit_imgs[i])].append(ImageTk.PhotoImage(atk_image))
         atk_image = atk_image.transpose(Image.FLIP_LEFT_RIGHT)
-        enemy_atk_imgs[str(unit_imgs[i])].append(ImageTk.PhotoImage(atk_image))
+        if unit_imgs[i] == tk_healer_img:
+            enemy_atk_imgs[str(opposite_healer)].append(ImageTk.PhotoImage(atk_image))
+        else:
+            enemy_atk_imgs[str(unit_imgs[i])].append(ImageTk.PhotoImage(atk_image))
 
 canvas = tk.Canvas(root, bg="white", highlightthickness=0)
 canvas.pack(fill=tk.BOTH, expand=True)
@@ -309,6 +326,7 @@ print(unit_stats)
 my_army_tags = create_army(army, WIDTH//4)
 my_army_tags_alive = [i for i in my_army_tags]
 enemy_army = [['vampire', [[-15, 5, -2, 0.1, 0, 70]]], ['vampire', [[-15, 5, -2, 0.1, 0, 70]]], ['vampire', []], ['knight', []]]
+# enemy_army = [['healer', []]]
 enemy_army_tags = create_army(enemy_army, WIDTH//4 * 3 - size[0])
 enemy_army_tags_alive = [i for i in enemy_army_tags]
 
@@ -316,16 +334,6 @@ my_turn = True
 my_unit = None
 enemy_unit = None
 
-# for i in range(5):
-#     a = random.choice(my_army_tags)
-#     b = random.choice(enemy_army_tags)
-#     print(a, b)
-#     if random.choice([True, False]):
-#         ani(a, b)
-#     else:
-#         ani(b, a)
-#     # enemy 2 utoci na my 0 tak sa zasekne
-# print("____________________________________________________________________________")
 running_animation = False
 canvas.tag_bind("my_army", "<ButtonPress-1>", attacking_unit)
 canvas.tag_bind("enemy_army", "<ButtonPress-1>", defending_unit)
