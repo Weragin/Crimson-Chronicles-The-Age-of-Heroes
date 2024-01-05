@@ -1,8 +1,9 @@
-import tkinter as tk
-import sys
-from PIL import Image, ImageTk
-import subprocess
 import json
+import subprocess
+import sys
+import tkinter as tk
+
+from PIL import Image, ImageTk
 
 # canvas_dimensions = []
 
@@ -105,8 +106,8 @@ def find_unit(e):
         x1, y1 = canvas.coords(overlap[0])
         selected_unit = temp.index(overlap[0])
         select_rectangle = canvas.create_rectangle(x1 - size, y1 - size, x1 + W + size, y1 + H + size, fill=None, outline="green", width=2)
-        
-        
+
+
 
 def add_weapon(e):
     global selected_unit, temp, money

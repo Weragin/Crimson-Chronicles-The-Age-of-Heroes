@@ -45,7 +45,7 @@ target-version = "py312"
 # Later versions should include pydoc documentation (`D`)
 # so that the final version is well documented
 select = ["E", "F", "W", "C901", "I001", "N", "ARG", "RET"]
-ignore = []
+ignore = ["E501"]
 
 # Allow fix for all enabled rules (when `--fix`) is provided.
 fixable = ["ALL"]
