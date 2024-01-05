@@ -61,16 +61,16 @@ def Healer(e):
     global money
     if money >= 135:
         money -= 135
-        army.append(["defender", []])
+        army.append(["healer", []])
         canvas.itemconfig(money_text, text = money)
-        army_add(healer)
+        army_add(healer, small_healer)
 
 
 def Lancer(e):
     global money
     if money >= 120:
         money -= 120
-        army.append(["defender", []])
+        army.append(["lancer", []])
         canvas.itemconfig(money_text, text = money)
         army_add(lancer)
 
@@ -79,8 +79,6 @@ def army_add(unit, img = None):
     global tag_height, temp
     object_tag = canvas.find_withtag(unit)
     place = len(army) * 50
-    width = 25
-    height = 50
     if img == None:
         color = canvas.itemcget(object_tag, "fill")
         temp.append(canvas.create_rectangle(place + 100, tag_height * 3 + 10, place + 120, tag_height * 3 + 30, fill=color, tags=("army")))
@@ -98,41 +96,30 @@ def find_unit(e):
         if selected_unit != "":
             x1, y1, x2, y2 = canvas.coords(temp[selected_unit])
             canvas.coords(temp[selected_unit], x1 + size, y1 + size, x2 - size, y2 - size)
-        x1, y1, x2, y2 = canvas.coords(overlap[0])
-        selected_unit = temp.index(overlap[0])
-        canvas.coords(overlap[0], x1 - size, y1 - size, x2 + size, y2 + size)
+        x1, y1, x2, y2 = canvas.coords(overlap[1])
+        selected_unit = temp.index(overlap[1])
+        canvas.coords(overlap[1], x1 - size, y1 - size, x2 + size, y2 + size)
     except:
         if selected_unit != "":
             canvas.delete(select_rectangle)
-        x1, y1 = canvas.coords(overlap[0])
-        selected_unit = temp.index(overlap[0])
+        x1, y1 = canvas.coords(overlap[1])
+        selected_unit = temp.index(overlap[1])
         select_rectangle = canvas.create_rectangle(x1 - size, y1 - size, x1 + W + size, y1 + H + size, fill=None, outline="green", width=2)
         
         
 
 def add_weapon(e):
     global selected_unit, temp, money
-    try:
-        x1, y1, x2, y2 = canvas.coords(temp[selected_unit])
-        overlap = canvas.find_overlapping(e.x, e.y, e.x+1, e.y+1)
-        if weapons[overlap[0]][-1] <= money:
-            army[selected_unit][1].append(weapons[overlap[0]])
-            nofweapons = len(army[selected_unit][1])
-            color = canvas.itemcget(overlap[0], "fill")
-            move = 5 * (nofweapons - 1)
-            canvas.create_rectangle(x1 + move, y1 + 40, x2 - 10 + move, y2 + 30, fill=color)
-            money -= weapons[overlap[0]][-1]
-            canvas.itemconfig(money_text, text = money)
-    except:
+    if selected_unit != "":
         x1, y1 = canvas.coords(temp[selected_unit])
         overlap = canvas.find_overlapping(e.x, e.y, e.x+1, e.y+1)
-        if weapons[overlap[0]][-1] <= money:
-            army[selected_unit][1].append(weapons[overlap[0]])
+        if weapons[overlap[1]][-1] <= money:
+            army[selected_unit][1].append(weapons[overlap[1]])
             nofweapons = len(army[selected_unit][1])
-            color = canvas.itemcget(overlap[0], 'fill')
+            img = canvas.itemcget(overlap[1], 'image')
             move = 5 * (nofweapons - 1)
-            canvas.create_rectangle(x1 + move, y1 + H + 10, x1 + W - 10 + move, y1 + H + 40, fill=color)
-            money -= weapons[overlap[0]][-1]
+            canvas.create_image(x1 + move, y1 + H + 10, image = small_weapon_tags[img], anchor = 'nw')
+            money -= weapons[overlap[1]][-1]
             canvas.itemconfig(money_text, text = money)
 
 
@@ -200,6 +187,11 @@ tk_defender_img = ImageTk.PhotoImage(defender_img)
 small_defender = defender_img.resize((W, H))
 small_defender = ImageTk.PhotoImage(small_defender)
 
+healer_img = Image.open("pictures/healer.png")
+tk_healer_img = ImageTk.PhotoImage(healer_img)
+small_healer = healer_img.resize((W, H))
+small_healer = ImageTk.PhotoImage(small_healer)
+
 icon_names = ["pictures/icons/heart.png", "pictures/icons/attack.png", "pictures/icons/defense.png", "pictures/icons/vampirsm.png", "pictures/icons/heal.png", "pictures/icons/price.png"]
 icon_tags = []
 small_icon_tags = []
@@ -209,10 +201,23 @@ for i in icon_names:
     small_icon = icon_img.resize((25, 25))
     small_icon_tags.append(ImageTk.PhotoImage(small_icon))
 
+weapon_file = ["pictures/weapons/sword.png", "pictures/weapons/shield.png", "pictures/weapons/axe.png", "pictures/weapons/katana.png", "pictures/weapons/magic_wand.png"]
+weapon_tags = []
+small_weapon_tags = {}
+for i in weapon_file:
+    weapon_img = Image.open(i)
+    weapon_tags.append(ImageTk.PhotoImage(weapon_img))
+    small_weapon = weapon_img.resize((25, 37))
+    small_weapon_tags[str(weapon_tags[-1])] = ImageTk.PhotoImage(small_weapon)
+
 canvas = tk.Canvas(root, bg='white', highlightthickness=0)
 canvas.pack(fill=tk.BOTH, expand=True)
 WIDTH = int(sys.argv[1])
 HEIGHT = int(sys.argv[2])
+
+background = Image.open("pictures/bg/build_army_bg.png").resize((WIDTH, HEIGHT))
+tk_background = ImageTk.PhotoImage(background)
+canvas.create_image(0, 0, image = tk_background, anchor = 'nw')
 
 exit_button = tk.Button(root, text='EXIT', command=close, width=5)
 exit_button.place(x = WIDTH - 50, y = 0)
@@ -240,7 +245,7 @@ canvas.tag_bind(vampire, "<ButtonPress-1>", Vampire)
 defender = character_create(x, tag_height * 2 - y + 50, 3 * x, tag_height * 2 + y + 50, unit_stats["defender"], tk_defender_img)
 canvas.tag_bind(defender, "<ButtonPress-1>", Defender)
 
-healer = character_create(tag_width, tag_height * 2 - y + 50, tag_width + 2*x, tag_height * 2 + y + 50, unit_stats["healer"], None)
+healer = character_create(tag_width, tag_height * 2 - y + 50, tag_width + 2*x, tag_height * 2 + y + 50, unit_stats["healer"], tk_healer_img)
 canvas.tag_bind(healer, "<ButtonPress-1>", Healer)
 
 lancer = character_create(tag_width*2 - x, tag_height * 2 - y + 50, tag_width*2 + x, tag_height * 2 + y + 50, unit_stats["lancer"], None)
@@ -256,7 +261,7 @@ wx1 = tag_width * 3 - x//2
 wx2 = tag_width * 3 + x//2
 weapon_stats = [[5, 2, 0, 0, 0, 50], [20, -1, 2, 0, 0, 50], [-15, 5, -2, 0.1, 0, 70], [-20, 6, -5, 0.5, 0, 100], [30, 3, 0, 0, 3, 80]]
 for i in range(5):
-    temp = weapon_create(wx1, 25 + i*hspace, wx2, 75 + hspace*i, weapon_stats[i])
+    temp = weapon_create(wx1, 25 + i*hspace, wx2, 75 + hspace*i, weapon_stats[i], weapon_tags[i])
     weapons[temp] = weapon_stats[i]
 
 canvas.tag_bind("weapons", "<ButtonPress-1>", add_weapon)
