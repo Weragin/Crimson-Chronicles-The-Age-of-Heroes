@@ -51,12 +51,14 @@ class Attack:
         self.attacker = attacker
         self.defender = defender
         self.atk_coords = canvas.coords(attacker)
+        self.attacker_img = canvas.itemcget(self.attacker, 'image')
         self.enemy = -1 if self.atk_coords[0] > WIDTH//2 else 1
         def_coords = canvas.coords(defender)
         self.end_coords = (def_coords[0] + (- size[0] - 20) * self.enemy, def_coords[1])
         self.dx = self.end_coords[0] - self.atk_coords[0]
         self.dy = self.end_coords[1] - self.atk_coords[1]
         self.steps = 20
+        self.attacking_move = 0
     
     def animate(self):
         is_lancer = canvas.itemcget(self.attacker, 'image')
@@ -76,22 +78,38 @@ class Attack:
         else:
             self.steps = 20
             self.attakcing()
-            self.turn_around()
-            print('returning')
-            self.move_from()
+            canvas.after(1600, self.turn_around)
+            # self.turn_around()
+            # print('returning')
+            # self.move_from()
     
     def attakcing(self):
+        self.atttack_animation()
         tags = canvas.itemcget(self.defender, 'tags').split(' ')
         items = canvas.find_withtag(tags[1])
         dmg = random.randint(5, 10)
         hp = canvas.itemcget(items[-1], 'text')
         canvas.itemconfig(items[-1], text = int(hp) - dmg)
+        self.attacking_move = 0
+
+    def atttack_animation(self):
+        if self.attacking_move < 3:
+            if self.enemy == 1:
+                canvas.itemconfig(self.attacker, image = atk_imgs[self.attacker_img][self.attacking_move])
+                self.attacking_move += 1
+                canvas.after(400, self.atttack_animation)
+            else:
+                canvas.itemconfig(self.attacker, image = enemy_atk_imgs[self.attacker_img][self.attacking_move])
+                self.attacking_move += 1
+                canvas.after(400, self.atttack_animation)
 
     def turn_around(self):
+        canvas.itemconfig(self.attacker, image = self.attacker_img)
         id = str(canvas.itemcget(self.attacker, 'image'))
         print(id)
         canvas.itemconfig(self.attacker, image = opposite_img[id])
         print(canvas.itemcget(self.attacker, 'image'))
+        self.move_from()
 
     def turn_back(self):
         id = canvas.itemcget(self.attacker, 'image')
@@ -194,7 +212,7 @@ def attack(e):
         my_turn = False
         atk = Attack(my_unit, enemy_unit)
         atk.animate()
-        canvas.after(3000, enemy_attack)
+        canvas.after(4500, enemy_attack)
 
 
 
@@ -225,6 +243,8 @@ healer_img = Image.open("pictures/healer.png").resize(size)
 tk_healer_img = ImageTk.PhotoImage(healer_img)
 lancer_img = Image.open("pictures/lancer.png").resize(size)
 tk_lancer_img = ImageTk.PhotoImage(lancer_img)
+death_icon = Image.open("pictures/grave.png").resize(size)
+tk_death_icon = ImageTk.PhotoImage(death_icon)
 
 unit_imgs = {"warrior": tk_warrior_img, "knight": tk_knight_img, "vampire": tk_vampire_img, "defender": tk_defender_img, 'healer': tk_healer_img, "lancer": tk_lancer_img}
 opposite_healer = healer_img.transpose(Image.FLIP_LEFT_RIGHT)
@@ -232,6 +252,17 @@ opposite_healer = ImageTk.PhotoImage(opposite_healer)
 # lancer bude na motorke takze potom dam
 opposite_lancer = None
 opposite_img = {str(tk_warrior_img): tk_warrior_img, str(tk_knight_img): tk_knight_img, str(tk_vampire_img): tk_vampire_img, str(tk_defender_img): tk_defender_img, str(tk_healer_img): opposite_healer, str(tk_lancer_img): opposite_lancer}
+
+atk_file = ["warrior", "vampire", "knight", "healer", "defender"]
+atk_imgs = {str(tk_warrior_img): [], str(tk_knight_img): [], str(tk_vampire_img): [], str(tk_defender_img): [], str(tk_healer_img): [], str(tk_lancer_img): []}
+enemy_atk_imgs = {str(tk_warrior_img): [], str(tk_knight_img): [], str(tk_vampire_img): [], str(tk_defender_img): [], str(tk_healer_img): [], str(tk_lancer_img): []}
+for i in atk_file:
+    for j in range(3):
+        file_name = "pictures/attack/" + i + "_attack/" + i + '_' + str(j + 1) + ".png"
+        atk_image = Image.open(file_name).resize((128 ,160))
+        atk_imgs[str(unit_imgs[i])].append(ImageTk.PhotoImage(atk_image))
+        atk_image = atk_image.transpose(Image.FLIP_LEFT_RIGHT)
+        enemy_atk_imgs[str(unit_imgs[i])].append(ImageTk.PhotoImage(atk_image))
 
 canvas = tk.Canvas(root, bg="white", highlightthickness=0)
 canvas.pack(fill=tk.BOTH, expand=True)
