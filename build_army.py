@@ -61,7 +61,7 @@ def Healer(e):
     global money
     if money >= 135:
         money -= 135
-        army.append(["defender", []])
+        army.append(["healer", []])
         canvas.itemconfig(money_text, text = money)
         army_add(healer, small_healer)
 
@@ -70,7 +70,7 @@ def Lancer(e):
     global money
     if money >= 120:
         money -= 120
-        army.append(["defender", []])
+        army.append(["lancer", []])
         canvas.itemconfig(money_text, text = money)
         army_add(lancer)
 
@@ -110,26 +110,15 @@ def find_unit(e):
 
 def add_weapon(e):
     global selected_unit, temp, money
-    try:
-        x1, y1, x2, y2 = canvas.coords(temp[selected_unit])
-        overlap = canvas.find_overlapping(e.x, e.y, e.x+1, e.y+1)
-        if weapons[overlap[0]][-1] <= money:
-            army[selected_unit][1].append(weapons[overlap[0]])
-            nofweapons = len(army[selected_unit][1])
-            color = canvas.itemcget(overlap[0], "fill")
-            move = 5 * (nofweapons - 1)
-            canvas.create_rectangle(x1 + move, y1 + 40, x2 - 10 + move, y2 + 30, fill=color)
-            money -= weapons[overlap[0]][-1]
-            canvas.itemconfig(money_text, text = money)
-    except:
+    if selected_unit != "":
         x1, y1 = canvas.coords(temp[selected_unit])
         overlap = canvas.find_overlapping(e.x, e.y, e.x+1, e.y+1)
         if weapons[overlap[0]][-1] <= money:
             army[selected_unit][1].append(weapons[overlap[0]])
             nofweapons = len(army[selected_unit][1])
-            color = canvas.itemcget(overlap[0], 'fill')
+            img = canvas.itemcget(overlap[0], 'image')
             move = 5 * (nofweapons - 1)
-            canvas.create_rectangle(x1 + move, y1 + H + 10, x1 + W - 10 + move, y1 + H + 40, fill=color)
+            canvas.create_image(x1 + move, y1 + H + 10, image = small_weapon_tags[img], anchor = 'nw')
             money -= weapons[overlap[0]][-1]
             canvas.itemconfig(money_text, text = money)
 
@@ -214,10 +203,12 @@ for i in icon_names:
 
 weapon_file = ["pictures/weapons/sword.png", "pictures/weapons/shield.png", "pictures/weapons/axe.png", "pictures/weapons/katana.png", "pictures/weapons/magic_wand.png"]
 weapon_tags = []
-small_weapon_tags = []
+small_weapon_tags = {}
 for i in weapon_file:
     weapon_img = Image.open(i)
     weapon_tags.append(ImageTk.PhotoImage(weapon_img))
+    small_weapon = weapon_img.resize((25, 37))
+    small_weapon_tags[str(weapon_tags[-1])] = ImageTk.PhotoImage(small_weapon)
 
 canvas = tk.Canvas(root, bg='white', highlightthickness=0)
 canvas.pack(fill=tk.BOTH, expand=True)
