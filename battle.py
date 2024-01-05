@@ -155,6 +155,7 @@ class Attack:
         self.lancer_move_to()
 
     def lancer_move_to(self):
+        canvas.itemconfig(self.attacker, image = tk_lancer_move if self.enemy == 1 else opposite_lancer)
         tag = canvas.itemcget(self.attacker, 'tags').split(' ')
         tag = tag[1]
         canvas.move(tag, self.dxl/20, self.dyl/20)
@@ -166,7 +167,7 @@ class Attack:
             self.lancer_attack()
     
     def lancer_attack(self):
-        # zmeni sa na motorku hore
+        canvas.itemconfig(self.attacker, image = tk_lancer_attack)
         tag = canvas.itemcget(self.attacker, 'tags').split(' ')
         tag = tag[1]
         canvas.move(tag, 0, self.atk_dy/-20)
@@ -187,6 +188,7 @@ class Attack:
         self.lancer_move_from()
 
     def lancer_move_from(self):
+        canvas.itemconfig(self.attacker, image = tk_lancer_move if self.enemy == -1 else opposite_lancer)
         tag = canvas.itemcget(self.attacker, 'tags').split(' ')
         tag = tag[1]
         canvas.move(tag, self.return_x/20, self.return_y/20)
@@ -198,10 +200,7 @@ class Attack:
             self.lancer_turn_back()
         
     def lancer_turn_back(self):
-    #     id = canvas.itemcget(self.attacker, 'image')
-    #     img_id = [i for i in opposite_img if str(opposite_img[i]) == id]
-    #     canvas.itemconfig(self.attacker, image = img_id)
-        pass
+        canvas.itemconfig(self.attacker, image = tk_lancer_img)
 
 
 def attacking_unit(e):
@@ -261,11 +260,16 @@ tk_lancer_img = ImageTk.PhotoImage(lancer_img)
 death_icon = Image.open("pictures/grave.png").resize(size)
 tk_death_icon = ImageTk.PhotoImage(death_icon)
 
+lancer_move = Image.open("pictures/attack/lancer_attack/lancer_move.png").resize((160, 160))
+tk_lancer_move = ImageTk.PhotoImage(lancer_move)
+lancer_attack = Image.open("pictures/attack/lancer_attack/lancer_attack.png").resize((80, 160))
+tk_lancer_attack = ImageTk.PhotoImage(lancer_attack)
+
 unit_imgs = {"warrior": tk_warrior_img, "knight": tk_knight_img, "vampire": tk_vampire_img, "defender": tk_defender_img, 'healer': tk_healer_img, "lancer": tk_lancer_img}
 opposite_healer = healer_img.transpose(Image.FLIP_LEFT_RIGHT)
 opposite_healer = ImageTk.PhotoImage(opposite_healer)
-# lancer bude na motorke takze potom dam
-opposite_lancer = None
+opposite_lancer = lancer_move.transpose(Image.FLIP_LEFT_RIGHT)
+opposite_lancer = ImageTk.PhotoImage(opposite_lancer)
 opposite_img = {str(tk_warrior_img): tk_warrior_img, str(tk_knight_img): tk_knight_img, str(tk_vampire_img): tk_vampire_img, str(tk_defender_img): tk_defender_img, str(tk_healer_img): opposite_healer, str(tk_lancer_img): opposite_lancer}
 
 atk_file = ["warrior", "vampire", "knight", "healer", "defender"]
