@@ -1,4 +1,5 @@
-from typing import Tuple, List
+from random import choice
+from typing import List, Tuple
 
 
 # py.checkio Warriors
@@ -10,103 +11,120 @@ class Unit:
     :method hit: Called whenever the unit attacks. Takes an array of targets and handles targeting and effects that influence the attacker (e.g. vampirism)
     :method on_attacked: Called whenever the unit is beeing attacked. Handles effects related to the defender, e.g. defence.
     :method remove: Called when the unit dies. Should remove the unit and handle effects related but it might be redundant later.
-    
-    :property name: The name of the soldier
-    :property cost: Self-explanatory
-    :property health: Self-explanatory
-    :property attack: Self-explanatory
-    :property is_alive: True as long as health > 0
+
+    TBA: properties
+    :property id: Used to identify the unit.
+    :property health:
+    :property attack:
+    :property defence:
     """
     
-    def __init__(self, name, cost, health, attack, **kwargs):
-        self.name = name
-        self.cost = cost
+    def __init__(self, id: int, health: int, attack: int, defence=0, vampirism=0, heal_power=0):
+        self.id = id
+        self.max_health = health
         self.health = health
         self.attack = attack
-        self.is_alive = True
-        for key, value in kwargs.items():
-            setattr(self, key, value)
+        self.defence = defence
+        self.vampirism = vampirism
+        self.heal_power = heal_power
 
-    def hit(self, targets: List["Unit"]) -> Tuple[int, int, int]:
+    def equip_weapon(self, stats: list[int]):
+        self.max_health += stats[0]
+        self.health += stats[0]
+        self.attack += stats[1]
+        self.defence += stats[2]
+        self.vampirism += stats[3]
+        self.heal_power += stats[4]
+
+    def hit(self, targets: List["Unit"], allies: List["Unit"]) -> dict[int, int]:
         """
         Handles the event of a unit beeing called as an attacker.
 
         Handles the effects of an attack on the attacker and calls the on_attacked() method of another Unit, returning its return values.
         
-        :param targets: Iterable[Unit, ...]: An array of Units that might be targeted
+        :param targets: List[Unit]: An array of Units that might be targeted
+        :param allies: List[Unit]: An array of allies that might be healed]
         
-        :returns: Tuple[int, int, int]: The health of the attacked unit before and after attack and the damage dealt.
+        :returns: dict[int, int]: The ids and resulting hp for all targets and the ids and resulting hp for all allies
         """
-        original_hp, damage_dealt, final_hp = targets[0].on_attacked(self.attack)
-        return original_hp, damage_dealt, final_hp
+        # attacking
+        target = choice(targets)
+        enemy_id, enemy_hp, damage_dealt = target.on_attacked(self.attack)
+        health_points = {enemy_id: enemy_hp}
 
-    def on_attacked(self, damage):
+        # vampirism
+        if self.vampirism > 0:
+            self.on_healed(damage_dealt * self.vampirism)
+            health_points[self.id] = self.health
+
+        # healing
+        if self.heal_power > 0:
+            for unit in allies:
+                id, health = unit.on_healed(self.heal_power)
+                health_points[id] = health
+        
+        return health_points
+
+    def on_attacked(self, damage) -> Tuple[int, int, int]:
         original_hp = self.health
-        self.health -= damage
-        if self.health <= 0:
-            self.is_alive = False
-            self.remove()
+        damage_dealt = max(damage + self.defence, 0)
+        self.health = max(self.health - damage_dealt, 0)
+        damage_dealt = original_hp - self.health
+        
+        return self.id, self.health, damage_dealt
 
-        return original_hp, damage, self.health
+    def on_healed(self, heal_power) -> Tuple[int, int]:
+        original_hp = self.health
+        self.health = min(self.health + heal_power, self.max_health)
 
-    def remove(self):
-        """ 
-        TODO: add functionality or remove
-        Handles the event of a unit dying.
-        """
-        pass
-
+        return self.id, self.health
+        
 
 class Warrior(Unit):
-    """
-    The most basic unit
-    :property cost: int: =10
-    :property health: int: =50
-    :property attack: int: =5
-    """
-    def __init__(self, name):
-        Unit.__init__(self, name, cost=10, health=50, attack=5)
+    """The most basic unit."""
 
 
 class Knight(Unit):
-    """
-    The better version of the most basic unit. Deals more damage
-    :property cost: int: =13
-    :property health: int: =50
-    :property attack: int: =7
-    """
-    def __init__(self, name):
-        Unit.__init__(self, name, cost=13, health=50, attack=7)
+    """The better version of the Warrior."""
 
 
 class Defender(Unit):
-    """
-    The first special unit. Whenever it takes damage, it reduces the damage taken.
-    :property cost: int: =30
-    :property health: int: =50
-    :property attack: int: =6
-    """
-    def __init__(self, name):
-        Unit.__init__(self, name, cost=12, health=60, attack=3, defence=2)
+    """The first special unit. Whenever it takes damage, it reduces the damage taken."""
 
-    def on_attacked(self, damage):
-        return Unit.on_attacked(self, damage - self.defence)
+class Vampire(Unit):
+    """The second special unit. Whenever it deals damage, it heals."""
 
 
 class Lancer(Unit):
-    """
-    A special unit that modifies targeting to attack all units but has great cost.
-    :property cost: int: =30
-    :property health: int: =50
-    :property attack: int: =6
-    """
-    def __init__(self, name):
-        Unit.__init__(self, name, cost=30, health=50, attack=6)
-
-    def hit(self, targets: List[Unit]):
+    """A special unit that attacks all opposing units"""
+    def hit(self, targets: List[Unit], allies: List[Unit]):
         """
         Attacks all oposing units.
-        :param targets: Iterable[Unit, ...]: An array of Units that might be targeted
+        :param targets: List[Unit, ...]: An array of Units to be attacked.
+        :param allies: List[Unit, ...]: An array of allies that might be healed.
+        :returns: Tuple[dict[int, int], dict[int, int]]: The ids and resulting hp for all targets and allies.
         """
+        # attacking
+        total_damage = 0
+        health_points = {}
         for target in targets:
-            target.on_attacked(self.attack)
+            enemy_id, enemy_hp, damage_dealt = target.on_attacked(self.attack)
+            health_points[enemy_id] = enemy_hp
+            total_damage += damage_dealt
+
+        # vampirism
+        if self.vampirism > 0:
+            self.on_healed(total_damage * self.vampirism)
+            health_points[self.id] = self.health
+
+        # healing
+        if self.heal_power > 0:
+            for unit in allies:
+                id, health = unit.on_healed(self.heal_power)
+                health_points[id] = health
+
+        return health_points
+
+
+class Healer(Unit):
+    """A special unit that heals all allies."""
