@@ -1,11 +1,11 @@
-import tkinter as tk
-import sys
-from PIL import Image, ImageTk
-import subprocess
 import json
+import subprocess
+import sys
+import tkinter as tk
+
+from PIL import Image, ImageTk
 
 # canvas_dimensions = []
-
 
 def close(e = 0):
     root.withdraw()
@@ -105,7 +105,6 @@ def find_unit(e):
         x1, y1 = canvas.coords(overlap[1])
         selected_unit = temp.index(overlap[1])
         select_rectangle = canvas.create_rectangle(x1 - size, y1 - size, x1 + W + size, y1 + H + size, fill=None, outline="green", width=2)
-        
         
 
 def add_weapon(e):
@@ -237,6 +236,7 @@ tag_height = HEIGHT//3 - 50
 
 x = 50
 y = 100
+
 unit_stats = {"warrior": [100, 5, 2, 0, 0, 90], "knight": [120, 7, 2, 0, 0, 100], "vampire": [140, 5, 2, 5, 0, 80], "defender": [130, 5, 5, 0, 0, 150], "healer": [135, 0, 2, 0, 5, 100], "lancer": [120, 7, 2, 0, 0, 90]}
 warrior = character_create(x, tag_height - y, 3 * x, tag_height + y, unit_stats["warrior"], tk_warrior_img)
 canvas.tag_bind(warrior, "<ButtonPress-1>", Warrior)

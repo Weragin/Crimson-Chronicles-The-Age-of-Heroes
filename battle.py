@@ -330,6 +330,7 @@ enemy_army = [['vampire', [[-15, 5, -2, 0.1, 0, 70]]], ['vampire', [[-15, 5, -2,
 enemy_army_tags = create_army(enemy_army, WIDTH//4 * 3 - size[0])
 enemy_army_tags_alive = [i for i in enemy_army_tags]
 
+#TODO: turn all of this into a mutually recursive functions that uses time.sleep() to regulate whose turn it is
 my_turn = True
 my_unit = None
 enemy_unit = None

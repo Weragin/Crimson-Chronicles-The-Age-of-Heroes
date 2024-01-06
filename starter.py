@@ -1,7 +1,9 @@
-import tkinter as tk
 import subprocess
 import sys
+import tkinter as tk
+
 from PIL import Image, ImageTk
+
 
 
 def canvas_size(e):
