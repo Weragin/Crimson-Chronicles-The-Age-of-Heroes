@@ -31,5 +31,5 @@ root.bind("<Key>", exit_application)
 root.mainloop()
 
 root.withdraw()
-subprocess.run(["python", "build_army.py", str(WIDTH), str(HEIGHT)])
+subprocess.run([sys.executable, "build_army.py", str(WIDTH), str(HEIGHT)])
 sys.exit()
