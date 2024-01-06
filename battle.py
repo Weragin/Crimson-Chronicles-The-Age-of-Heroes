@@ -320,10 +320,20 @@ exit_button = tk.Button(root, text='EXIT', command=close)
 exit_button.place(x = WIDTH, y = 0, anchor='ne')
 root.bind('<Escape>', close)
 
-# Army setup (319-338)
+# Army setup (319-348)
 army = sys.argv[1]
 army = json.loads(army)
 print(army)
+army_objects = []
+
+# Backend army setup. Since the only unit with special behaviour is the lance, we call a different constructor for him. 
+# All the other units are essentially the same, so we call the base Unit() constructor.
+for i in army:
+    match i[0]:
+        case "lancer":
+            pass
+        case _:
+            pass
 
 unit_stats = sys.argv[2]
 unit_stats = json.loads(unit_stats)
