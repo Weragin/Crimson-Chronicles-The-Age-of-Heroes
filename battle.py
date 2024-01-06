@@ -5,6 +5,7 @@ import tkinter as tk
 
 from PIL import Image, ImageTk
 from time import sleep
+from typing import List, Tuple
 
 import units
 
@@ -56,6 +57,31 @@ def hp_create(unit_id, hp, tag):
     hp_coords = (unit_coords[0], unit_coords[1] - 20)
     canvas.create_image(hp_coords[0], hp_coords[1], image = tk_hp_icon, anchor = 'nw', tags = tag)
     canvas.create_text(hp_coords[0] + 20 + 10, hp_coords[1] - 5, text=hp, anchor='nw', font=("Helvetica 16 bold"), tags= tag)
+
+
+def create_backend_army(army, ids: list[int], unit_stats):
+    """
+    Backend army setup. 
+    
+    :param army: List[List[str, list[list[int]], int], ...]: The army to be created.
+    :param unit_stats: dict[str, list[int]]: The stats of the units.
+    :return: List[units.Unit]: The created army.
+    """
+    army_objects = []
+    for i in range(len(army)):
+        id = ids[i]
+        unit_type = army[i][0]
+        stats = unit_stats[unit_type]
+        
+        match unit_type:
+            case "lancer":
+                # Since the only unit with special behaviour is the lancer, we call a different constructor for him:
+                army_objects.append(units.Lancer(id, stats[0], stats[1], stats[2], stats[3]))
+            case _:
+                # All the other units are essentially the same, so we call the base Unit() constructor for them:
+                army_objects.append(units.Unit(id, stats[0], stats[1], stats[2], stats[3]))
+
+    return army_objects
 
 
 class Attack:
@@ -113,8 +139,8 @@ class Attack:
             else:
                 enemy_army_tags_alive.remove(self.defender)
                 enemy_unit = None
-                print(enemy_army_tags_alive)
-                print(self.defender)
+                print(f"the unit died: {enemy_army_tags_alive}")
+                print(f"the defending unit: {self.defender}")
         self.attacking_move = 0
 
     def atttack_animation(self):
@@ -235,7 +261,7 @@ def defending_unit(e):
     temp = canvas.find_overlapping(e.x, e.y, e.x+1, e.y+1)[1]
     if canvas.itemcget(temp, 'image') != str(tk_death_icon):
         enemy_unit = temp
-        print("defending unit selected")
+        print("defending unit selected: {}".format(enemy_unit))
 
 
 def attack(e):
@@ -261,7 +287,7 @@ def enemy_attack():
 root = tk.Tk()
 root.attributes('-fullscreen', True)
 
-# Image processing (260-302)
+# Image processing
 hp_icon = Image.open("pictures/icons/heart.png").resize((20, 20))
 tk_hp_icon = ImageTk.PhotoImage(hp_icon)
 size = (80, 160)
@@ -306,7 +332,7 @@ for i in atk_file:
         else:
             enemy_atk_imgs[str(unit_imgs[i])].append(ImageTk.PhotoImage(atk_image))
 
-# Window setup (305-316)
+# Window setup 
 canvas = tk.Canvas(root, bg="white", highlightthickness=0)
 canvas.pack(fill=tk.BOTH, expand=True)
 WIDTH = int(sys.argv[3])
@@ -320,24 +346,13 @@ exit_button = tk.Button(root, text='EXIT', command=close)
 exit_button.place(x = WIDTH, y = 0, anchor='ne')
 root.bind('<Escape>', close)
 
-# Army setup (319-348)
+# Army setup
 army = sys.argv[1]
 army = json.loads(army)
-print(army)
-army_objects = []
-
-# Backend army setup. Since the only unit with special behaviour is the lance, we call a different constructor for him. 
-# All the other units are essentially the same, so we call the base Unit() constructor.
-for i in army:
-    match i[0]:
-        case "lancer":
-            pass
-        case _:
-            pass
 
 unit_stats = sys.argv[2]
 unit_stats = json.loads(unit_stats)
-print(unit_stats)
+print(f"unit_stats: {unit_stats}")
 # stats- hp, atk, def, vamp, heal, cost
 
 my_army_tags = create_army(army, WIDTH//4)
@@ -346,8 +361,20 @@ enemy_army = [['vampire', [[-15, 5, -2, 0.1, 0, 70]]], ['vampire', [[-15, 5, -2,
 # enemy_army = [['healer', []]]
 enemy_army_tags = create_army(enemy_army, WIDTH//4 * 3 - size[0])
 enemy_army_tags_alive = [i for i in enemy_army_tags]
+print(f"army tags: {my_army_tags}")
+print(f"enemy army: {enemy_army_tags}")
 
-#TODO: turn all of this into a mutually recursive functions that use time.sleep() to regulate whose turn it is
+# backend representation of the armies
+my_army_objects = create_backend_army(army, my_army_tags, unit_stats)
+enemy_army_objects = create_backend_army(enemy_army, enemy_army_tags, unit_stats)
+
+#TODO: turn all of this into a pair of mutually recursive functions that use time.sleep() to regulate whose turn it is
+
+# 1 generate the order of attacks - a tuple[0/1, id]
+# 2 iteratively call either player_turn (t[0]==0) or enemy_turn (t[0]==1)
+# 3 player_turn: bind defending_unit to canvas to the tag "enemy_army"
+#  - once the defending unit is selected, 
+# 4 enemy_turn: 
 my_turn = True
 my_unit = None
 enemy_unit = None
