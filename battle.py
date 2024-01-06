@@ -256,6 +256,7 @@ def enemy_attack():
 root = tk.Tk()
 root.attributes('-fullscreen', True)
 
+# Image processing (260-302)
 hp_icon = Image.open("pictures/icons/heart.png").resize((20, 20))
 tk_hp_icon = ImageTk.PhotoImage(hp_icon)
 size = (80, 160)
@@ -300,6 +301,7 @@ for i in atk_file:
         else:
             enemy_atk_imgs[str(unit_imgs[i])].append(ImageTk.PhotoImage(atk_image))
 
+# Window setup (305-316)
 canvas = tk.Canvas(root, bg="white", highlightthickness=0)
 canvas.pack(fill=tk.BOTH, expand=True)
 WIDTH = int(sys.argv[3])
@@ -313,10 +315,10 @@ exit_button = tk.Button(root, text='EXIT', command=close)
 exit_button.place(x = WIDTH, y = 0, anchor='ne')
 root.bind('<Escape>', close)
 
+# Army setup (319-338)
 army = sys.argv[1]
 army = json.loads(army)
 # print(army)
-
 
 unit_stats = sys.argv[2]
 unit_stats = json.loads(unit_stats)
