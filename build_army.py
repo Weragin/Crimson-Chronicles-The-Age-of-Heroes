@@ -16,7 +16,7 @@ def next(e = 0):
     str_army = json.dumps(army)
     str_unit_stats = json.dumps(unit_stats)
     root.withdraw()
-    subprocess.run(["python", "battle.py", str_army, str_unit_stats, str(WIDTH), str(HEIGHT)])
+    subprocess.run([sys.executable, "battle.py", str_army, str_unit_stats, str(WIDTH), str(HEIGHT)])
     sys.exit()
 
 
