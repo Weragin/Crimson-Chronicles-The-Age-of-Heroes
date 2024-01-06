@@ -5,7 +5,7 @@ import tkinter as tk
 
 from PIL import Image, ImageTk
 from time import sleep
-from typing import List, Tuple
+from typing import Dict, List, Tuple
 
 import units
 
@@ -59,15 +59,15 @@ def hp_create(unit_id, hp, tag):
     canvas.create_text(hp_coords[0] + 20 + 10, hp_coords[1] - 5, text=hp, anchor='nw', font=("Helvetica 16 bold"), tags= tag)
 
 
-def create_backend_army(army, ids: list[int], unit_stats):
+def create_backend_army(army, ids: list[int], unit_stats) -> Dict[int, units.Unit]:
     """
     Backend army setup. 
     
     :param army: List[List[str, list[list[int]], int], ...]: The army to be created.
     :param unit_stats: dict[str, list[int]]: The stats of the units.
-    :return: List[units.Unit]: The created army.
+    :return: Dict[int, units.Unit]: The created army identified by ids.
     """
-    army_objects = []
+    army_objects = {}
     for i in range(len(army)):
         id = ids[i]
         unit_type = army[i][0]
@@ -76,10 +76,10 @@ def create_backend_army(army, ids: list[int], unit_stats):
         match unit_type:
             case "lancer":
                 # Since the only unit with special behaviour is the lancer, we call a different constructor for him:
-                army_objects.append(units.Lancer(id, stats[0], stats[1], stats[2], stats[3]))
+                army_objects[id] = units.Lancer(id, stats[0], stats[1], stats[2], stats[3])
             case _:
                 # All the other units are essentially the same, so we call the base Unit() constructor for them:
-                army_objects.append(units.Unit(id, stats[0], stats[1], stats[2], stats[3]))
+                army_objects[id] = units.Unit(id, stats[0], stats[1], stats[2], stats[3])
 
     return army_objects
 
@@ -373,7 +373,7 @@ enemy_army_objects = create_backend_army(enemy_army, enemy_army_tags, unit_stats
 # 1 generate the order of attacks - a tuple[0/1, id]
 # 2 iteratively call either player_turn (t[0]==0) or enemy_turn (t[0]==1)
 # 3 player_turn: bind defending_unit to canvas to the tag "enemy_army"
-#  - once the defending unit is selected, 
+#  - once the defending unit is selected,
 # 4 enemy_turn: 
 my_turn = True
 my_unit = None
