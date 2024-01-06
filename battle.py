@@ -370,11 +370,44 @@ enemy_army_objects = create_backend_army(enemy_army, enemy_army_tags, unit_stats
 
 #TODO: turn all of this into a pair of mutually recursive functions that use time.sleep() to regulate whose turn it is
 
-# 1 generate the order of attacks - a tuple[0/1, id]
-# 2 iteratively call either player_turn (t[0]==0) or enemy_turn (t[0]==1)
-# 3 player_turn: bind defending_unit to canvas to the tag "enemy_army"
-#  - once the defending unit is selected,
-# 4 enemy_turn: 
+# 1 function main():
+#  - while game_not_over: call_stack = attack_order(<living_units>)
+#      - while call_stack != []: 
+#          - attacker = call_stack.pop()
+#          - if attacker[0] == 0:
+#              - health_dict = player_turn(attacker[1], <armies>, call_stack)
+#          - else:
+#              - health_dict = enemy_turn(attacker[1], <armies>, call_stack)
+#            # do this in player_turn and enemy_turn:
+#          - for i in health_dict:
+#              - if health_dict[i] <= 0:
+#                  - if i in call_stack:
+#                      - call_stack.remove(i)
+#                  - if i in my_army_objects:
+#                      - my_army_objects.remove(i)
+#                  - if i in enemy_army_objects:
+#                      - enemy_army_objects.remove(i)
+#          - do the animatiooons
+#
+
+# 2 attack_order():
+#    generate the order of attacks - a tuple[0/1, id]
+# 2: iteratively call either player_turn() (if t[0]==0) or enemy_turn() (if t[0]==1)
+
+# 3 player_turn(): 
+#  - if the unit is lancer:
+#      - call self.hit() with targets = [i for i in enemy_army_objects.values()]
+#    else:
+#      - bind defending_unit to canvas to the tag "enemy_army"
+#      - call the attacker's self.hit() with 
+#        targets = [enemy_army_object[defending_unit]]
+#  - return health_dict
+
+# 4 enemy_turn(): 
+#  - call self.hit() with targets = [i for i in my_army_objects.values()]
+#  - return health_dict
+
+
 my_turn = True
 my_unit = None
 enemy_unit = None
