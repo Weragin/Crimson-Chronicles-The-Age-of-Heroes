@@ -5,7 +5,6 @@ import tkinter as tk
 from PIL import Image, ImageTk
 
 
-
 def canvas_size(e):
     global WIDTH, HEIGHT
     WIDTH = e.width
