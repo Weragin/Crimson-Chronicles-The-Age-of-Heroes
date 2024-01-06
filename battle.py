@@ -1,8 +1,12 @@
-import sys
 import json
-import tkinter as tk
-from PIL import Image, ImageTk
 import random
+import sys
+import tkinter as tk
+
+from PIL import Image, ImageTk
+from time import sleep
+
+import units
 
 
 def close(e = 0):
@@ -86,17 +90,18 @@ class Attack:
             canvas.after(50, self.move_to)
         else:
             self.steps = 20
-            self.attakcing()
+            self.attacking()
             canvas.after(1600, self.turn_around)
             # self.turn_around()
             # print('returning')
             # self.move_from()
     
-    def attakcing(self):
+    def attacking(self):
         global my_unit, enemy_unit
         self.atttack_animation()
         tags = canvas.itemcget(self.defender, 'tags').split(' ')
         items = canvas.find_withtag(tags[1])
+        # IMPORTANT - hp modifications happen here
         dmg = random.randint(5, 10)
         hp = canvas.itemcget(items[-1], 'text')
         canvas.itemconfig(items[-1], text = int(hp) - dmg)
@@ -318,7 +323,7 @@ root.bind('<Escape>', close)
 # Army setup (319-338)
 army = sys.argv[1]
 army = json.loads(army)
-# print(army)
+print(army)
 
 unit_stats = sys.argv[2]
 unit_stats = json.loads(unit_stats)
@@ -332,7 +337,7 @@ enemy_army = [['vampire', [[-15, 5, -2, 0.1, 0, 70]]], ['vampire', [[-15, 5, -2,
 enemy_army_tags = create_army(enemy_army, WIDTH//4 * 3 - size[0])
 enemy_army_tags_alive = [i for i in enemy_army_tags]
 
-#TODO: turn all of this into a mutually recursive functions that uses time.sleep() to regulate whose turn it is
+#TODO: turn all of this into a mutually recursive functions that use time.sleep() to regulate whose turn it is
 my_turn = True
 my_unit = None
 enemy_unit = None
