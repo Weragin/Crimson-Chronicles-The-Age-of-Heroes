@@ -7,7 +7,6 @@ from PIL import Image, ImageTk
 
 # canvas_dimensions = []
 
-
 def close(e = 0):
     root.withdraw()
     sys.exit()
@@ -17,7 +16,7 @@ def next(e = 0):
     str_army = json.dumps(army)
     str_unit_stats = json.dumps(unit_stats)
     root.withdraw()
-    subprocess.run(["python", "battle.py", str_army, str_unit_stats, str(WIDTH), str(HEIGHT)])
+    subprocess.run([sys.executable, "battle.py", str_army, str_unit_stats, str(WIDTH), str(HEIGHT)])
     sys.exit()
 
 
@@ -60,8 +59,8 @@ def Defender(e):
 
 def Healer(e):
     global money
-    if money >= 135:
-        money -= 135
+    if money >= 100:
+        money -= 100
         army.append(["healer", []])
         canvas.itemconfig(money_text, text = money)
         army_add(healer, small_healer)
@@ -73,7 +72,7 @@ def Lancer(e):
         money -= 120
         army.append(["lancer", []])
         canvas.itemconfig(money_text, text = money)
-        army_add(lancer)
+        army_add(lancer, small_lancer)
 
 
 def army_add(unit, img = None):
@@ -97,30 +96,29 @@ def find_unit(e):
         if selected_unit != "":
             x1, y1, x2, y2 = canvas.coords(temp[selected_unit])
             canvas.coords(temp[selected_unit], x1 + size, y1 + size, x2 - size, y2 - size)
-        x1, y1, x2, y2 = canvas.coords(overlap[0])
-        selected_unit = temp.index(overlap[0])
-        canvas.coords(overlap[0], x1 - size, y1 - size, x2 + size, y2 + size)
+        x1, y1, x2, y2 = canvas.coords(overlap[1])
+        selected_unit = temp.index(overlap[1])
+        canvas.coords(overlap[1], x1 - size, y1 - size, x2 + size, y2 + size)
     except:
         if selected_unit != "":
             canvas.delete(select_rectangle)
-        x1, y1 = canvas.coords(overlap[0])
-        selected_unit = temp.index(overlap[0])
+        x1, y1 = canvas.coords(overlap[1])
+        selected_unit = temp.index(overlap[1])
         select_rectangle = canvas.create_rectangle(x1 - size, y1 - size, x1 + W + size, y1 + H + size, fill=None, outline="green", width=2)
-
-
+        
 
 def add_weapon(e):
     global selected_unit, temp, money
     if selected_unit != "":
         x1, y1 = canvas.coords(temp[selected_unit])
         overlap = canvas.find_overlapping(e.x, e.y, e.x+1, e.y+1)
-        if weapons[overlap[0]][-1] <= money:
-            army[selected_unit][1].append(weapons[overlap[0]])
+        if weapons[overlap[1]][-1] <= money:
+            army[selected_unit][1].append(weapons[overlap[1]])
             nofweapons = len(army[selected_unit][1])
-            img = canvas.itemcget(overlap[0], 'image')
+            img = canvas.itemcget(overlap[1], 'image')
             move = 5 * (nofweapons - 1)
             canvas.create_image(x1 + move, y1 + H + 10, image = small_weapon_tags[img], anchor = 'nw')
-            money -= weapons[overlap[0]][-1]
+            money -= weapons[overlap[1]][-1]
             canvas.itemconfig(money_text, text = money)
 
 
@@ -193,6 +191,11 @@ tk_healer_img = ImageTk.PhotoImage(healer_img)
 small_healer = healer_img.resize((W, H))
 small_healer = ImageTk.PhotoImage(small_healer)
 
+lancer_img = Image.open("pictures/lancer.png")
+tk_lancer_img = ImageTk.PhotoImage(lancer_img)
+small_lancer = lancer_img.resize((W, H))
+small_lancer = ImageTk.PhotoImage(small_lancer)
+
 icon_names = ["pictures/icons/heart.png", "pictures/icons/attack.png", "pictures/icons/defense.png", "pictures/icons/vampirsm.png", "pictures/icons/heal.png", "pictures/icons/price.png"]
 icon_tags = []
 small_icon_tags = []
@@ -216,6 +219,10 @@ canvas.pack(fill=tk.BOTH, expand=True)
 WIDTH = int(sys.argv[1])
 HEIGHT = int(sys.argv[2])
 
+background = Image.open("pictures/bg/build_army_bg.png").resize((WIDTH, HEIGHT))
+tk_background = ImageTk.PhotoImage(background)
+canvas.create_image(0, 0, image = tk_background, anchor = 'nw')
+
 exit_button = tk.Button(root, text='EXIT', command=close, width=5)
 exit_button.place(x = WIDTH - 50, y = 0)
 root.bind('<Escape>', close)
@@ -229,7 +236,8 @@ tag_height = HEIGHT//3 - 50
 
 x = 50
 y = 100
-unit_stats = {"warrior": [100, 5, 2, 0, 0, 90], "knight": [120, 7, 2, 0, 0, 100], "vampire": [140, 5, 2, 5, 0, 80], "defender": [130, 5, 5, 0, 0, 150], "healer": [135, 0, 2, 0, 5, 80], "lancer": [120, 7, 2, 0, 0, 90]}
+
+unit_stats = {"warrior": [100, 5, 2, 0, 0, 90], "knight": [120, 7, 2, 0, 0, 100], "vampire": [140, 5, 2, 5, 0, 80], "defender": [130, 5, 5, 0, 0, 150], "healer": [135, 0, 2, 0, 5, 100], "lancer": [120, 7, 2, 0, 0, 90]}
 warrior = character_create(x, tag_height - y, 3 * x, tag_height + y, unit_stats["warrior"], tk_warrior_img)
 canvas.tag_bind(warrior, "<ButtonPress-1>", Warrior)
 
@@ -245,7 +253,7 @@ canvas.tag_bind(defender, "<ButtonPress-1>", Defender)
 healer = character_create(tag_width, tag_height * 2 - y + 50, tag_width + 2*x, tag_height * 2 + y + 50, unit_stats["healer"], tk_healer_img)
 canvas.tag_bind(healer, "<ButtonPress-1>", Healer)
 
-lancer = character_create(tag_width*2 - x, tag_height * 2 - y + 50, tag_width*2 + x, tag_height * 2 + y + 50, unit_stats["lancer"], None)
+lancer = character_create(tag_width*2 - x, tag_height * 2 - y + 50, tag_width*2 + x, tag_height * 2 + y + 50, unit_stats["lancer"], tk_lancer_img)
 canvas.tag_bind(lancer, "<ButtonPress-1>", Lancer)
 
 canvas.create_line(0, tag_height * 3 - 25, WIDTH, tag_height * 3 - 25)
