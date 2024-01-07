@@ -320,7 +320,10 @@ def player_turn(attacker_id: int,
             allies=[i for i in allies_dict.values()]
             )
     else: 
-        pass
+        global enemy_unit
+        canvas.tag_bind("enemy_army", "<ButtonPress-1>", defending_unit)
+        root.wait_variable(enemy_unit)
+        print(f"the defending unit (from p_t): {enemy_unit}")
     # do this in player_turn and enemy_turn:
     #          - for i in health_dict:
     #              - if health_dict[i] <= 0:
@@ -377,7 +380,7 @@ def defending_unit(e):
     global enemy_unit, my_turn
     temp = canvas.find_overlapping(e.x, e.y, e.x+1, e.y+1)[1]
     if canvas.itemcget(temp, 'image') != str(tk_death_icon):
-        enemy_unit = temp
+        enemy_unit.set(temp)
         print("defending unit selected: {}".format(enemy_unit))
 
 
@@ -401,7 +404,7 @@ def enemy_attack():
     new_hp = {5: 60, 14: 34}
     atk = Attack(attacker, defender, new_hp)
     atk.animate()
-    canvas.after(4500, lambda: my_turn = True)
+    my_turn = True
 
 
 root = tk.Tk()
@@ -491,7 +494,7 @@ enemy_army_objects = create_backend_army(enemy_army, enemy_army_tags, unit_stats
 
 my_turn = True
 my_unit = None
-enemy_unit = None
+enemy_unit = tk.IntVar(root, 0)
 
 # no longer necessary: running_animation = False
 canvas.tag_bind("my_army", "<ButtonPress-1>", attacking_unit)
