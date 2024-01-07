@@ -62,7 +62,7 @@ class Unit:
                 id, health = unit.on_healed(self.heal_power)
                 health_points[id] = health
         
-        return health_points, enemy_id
+        return health_points
 
     def on_attacked(self, damage) -> Tuple[int, int, int]:
         original_hp = self.health
@@ -122,7 +122,7 @@ class Lancer(Unit):
                 id, health = unit.on_healed(self.heal_power)
                 health_points[id] = health
 
-        return health_points, enemy_id
+        return health_points
 
 
 class Healer(Unit):
