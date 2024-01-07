@@ -35,7 +35,7 @@ class Unit:
         self.vampirism += stats[3]
         self.heal_power += stats[4]
 
-    def hit(self, targets: List["Unit"], allies: List["Unit"]) -> dict[int, int]:
+    def hit(self, targets: List["Unit"], allies: List["Unit"]) -> Tuple[dict[int, int], int]:
         """
         Handles the event of a unit beeing called as an attacker.
 
@@ -44,7 +44,7 @@ class Unit:
         :param targets: List[Unit]: An array of Units that might be targeted
         :param allies: List[Unit]: An array of allies that might be healed]
         
-        :returns: dict[int, int]: The ids and resulting hp for all targets and allies, and the id of the defender. Used for animations.
+        :returns: Tuple[dict[int, int], int]: The ids and resulting hp for all targets and allies, and the id of the defender. Used for animations.
         """
         # attacking
         target = choice(targets)
@@ -62,7 +62,7 @@ class Unit:
                 id, health = unit.on_healed(self.heal_power)
                 health_points[id] = health
         
-        return health_points
+        return health_points, enemy_id
 
     def on_attacked(self, damage) -> Tuple[int, int, int]:
         original_hp = self.health
@@ -96,7 +96,7 @@ class Vampire(Unit):
 
 class Lancer(Unit):
     """A special unit that attacks all opposing units"""
-    def hit(self, targets: List[Unit], allies: List[Unit]) -> dict[int, int]:
+    def hit(self, targets: List[Unit], allies: List[Unit]) -> Tuple[dict[int, int], int]:
         """
         Attacks all oposing units.
         :param targets: List[Unit, ...]: An array of Units to be attacked.
@@ -122,7 +122,7 @@ class Lancer(Unit):
                 id, health = unit.on_healed(self.heal_power)
                 health_points[id] = health
 
-        return health_points
+        return health_points, enemy_id
 
 
 class Healer(Unit):
