@@ -83,31 +83,6 @@ def create_backend_army(army, ids: list[int], unit_stats) -> Dict[int, units.Uni
     return army_objects
 
 
-def create_backend_army(army, ids: list[int], unit_stats) -> Dict[int, units.Unit]:
-    """
-    Backend army setup. 
-    
-    :param army: List[List[str, list[list[int]], int], ...]: The army to be created.
-    :param unit_stats: dict[str, list[int]]: The stats of the units.
-    :return: Dict[int, units.Unit]: The created army identified by ids.
-    """
-    army_objects = {}
-    for i in range(len(army)):
-        id = ids[i]
-        unit_type = army[i][0]
-        stats = unit_stats[unit_type]
-        
-        match unit_type:
-            case "lancer":
-                # Since the only unit with special behaviour is the lancer, we call a different constructor for him:
-                army_objects[id] = units.Lancer(id, stats[0], stats[1], stats[2], stats[3])
-            case _:
-                # All the other units are essentially the same, so we call the base Unit() constructor for them:
-                army_objects[id] = units.Unit(id, stats[0], stats[1], stats[2], stats[3])
-
-    return army_objects
-
-
 class Attack:
     def __init__(self, attacker, defender, new_hp):
         global size
