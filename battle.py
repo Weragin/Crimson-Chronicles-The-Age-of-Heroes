@@ -281,12 +281,12 @@ def attack(e):
         # do the attacking part
         attacker_object = my_army_objects[my_unit]
         if type(attacker_object) == units.Lancer:
-            new_hp, defender = attacker_object.hit(
+            new_hp = attacker_object.hit(
                 targets=[i for i in enemy_army_objects.values()],
                 allies=[i for i in my_army_objects.values()]
                 )
         else:
-            new_hp, defender = attacker_object.hit(
+            new_hp = attacker_object.hit(
                 targets = [enemy_army_objects[enemy_unit]],
                 allies = [i for i in my_army_objects.values()]
                 )
@@ -307,7 +307,7 @@ def enemy_attack():
 
     # do the attacking part
     attacker_object = enemy_army_objects[attacker]
-    new_hp, defender = attacker_object.hit(
+    new_hp = attacker_object.hit(
         targets=[i for i in my_army_objects.values()],
         allies=[i for i in enemy_army_objects.values()]
         )
