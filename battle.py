@@ -274,36 +274,53 @@ def defending_unit(e):
 
 def attack(e):
     global my_turn, my_unit, enemy_unit, my_army_objects, enemy_army_objects
-    if my_turn and my_unit and enemy_unit: # Don't attack if no units selected
+    if my_turn and my_unit and enemy_unit: # Don't attack if not our turn or no units selected
         print("commencing attack")
         my_turn = False
         
+        # do the attacking part
         attacker_object = my_army_objects[my_unit]
         if type(attacker_object) == units.Lancer:
-            new_hp = attacker_object.hit(
+            new_hp, defender = attacker_object.hit(
                 targets=[i for i in enemy_army_objects.values()],
                 allies=[i for i in my_army_objects.values()]
                 )
         else:
-            new_hp = attacker_object.hit(
+            new_hp, defender = attacker_object.hit(
                 targets = [enemy_army_objects[enemy_unit]],
                 allies = [i for i in my_army_objects.values()]
                 )
-        
-        new_hp = {2: 48, 11: 94, 14: 5}
+            
+        # remove the dead units from army objects
+        for i in new_hp:
+            if new_hp[i] == 0:
+                enemy_army_objects.pop(i)
+        # animate
         atk = Attack(my_unit, enemy_unit, new_hp)
         atk.animate()
         canvas.after(4500, enemy_attack)
 
 
 def enemy_attack():
-    global my_turn
+    global my_turn, my_army_objects, enemy_army_objects
     attacker = random.choice(enemy_army_tags_alive)
-    defender = random.choice(my_army_tags_alive)
-    # do new_hp ide dict novych hp unitov v tvare {id: hp, id2: hp2, ...}
-    new_hp = {5: 60, 14: 34}
+
+    # do the attacking part
+    attacker_object = enemy_army_objects[attacker]
+    new_hp, defender = attacker_object.hit(
+        targets=[i for i in my_army_objects.values()],
+        allies=[i for i in enemy_army_objects.values()]
+        )
+
+    # remove the dead units from army objects
+    for i in new_hp:
+        if new_hp[i] == 0:
+            my_army_objects.pop(i)
+            
+    # animate
     atk = Attack(attacker, defender, new_hp)
     atk.animate()
+    # Don't start turn until after attack animation
     canvas.tag_unbind("my_army", "<ButtonPress-1>")
     canvas.tag_unbind("enemy_army", "<ButtonPress-1>")
     canvas.after(4500, my_turn_start)
