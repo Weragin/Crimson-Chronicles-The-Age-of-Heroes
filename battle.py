@@ -119,29 +119,31 @@ class Attack:
             self.steps = 20
             self.attacking()
             canvas.after(1600, self.turn_around)
-            # self.turn_around()
-            # print('returning')
-            # self.move_from()
     
     def attacking(self):
         global my_unit, enemy_unit
         self.atttack_animation()
-        tags = canvas.itemcget(self.defender, 'tags').split(' ')
-        items = canvas.find_withtag(tags[1])
-        # IMPORTANT - hp modifications happen here
-        hp = self.new_hp[self.defender]
-        # hp = canvas.itemcget(items[-1], 'text')
-        canvas.itemconfig(items[-1], text = hp)
-        if int(canvas.itemcget(items[-1], 'text')) <= 0:
-            canvas.itemconfig(self.defender, image = tk_death_icon)
-            if self.enemy == -1:
-                my_army_tags_alive.remove(self.defender)
-                my_unit = None
-            else:
-                enemy_army_tags_alive.remove(self.defender)
-                enemy_unit = None
-                print(f"the unit died: {enemy_army_tags_alive}")
-                print(f"the defending unit: {self.defender}")
+        # tags = canvas.itemcget(self.defender, 'tags').split(' ')
+        # items = canvas.find_withtag(tags[1])
+        # # IMPORTANT - hp modifications happen here
+        # hp = self.new_hp[self.defender]
+        # # hp = canvas.itemcget(items[-1], 'text')
+        # canvas.itemconfig(items[-1], text = hp)
+        # for i in self.new_hp:
+        #         tags = canvas.itemcget(i, 'tags').split(' ')
+        #         items = canvas.find_withtag(tags[1])
+        #         hp = self.new_hp[i]
+        #         canvas.itemconfig(items[-1], text = hp)
+        #         if int(canvas.itemcget(items[-1], 'text')) <= 0:
+        #             canvas.itemconfig(i, image = tk_death_icon)
+        #             if self.enemy == -1:
+        #                 my_army_tags_alive.remove(i)
+        #                 my_unit = None
+        #             else:
+        #                 enemy_army_tags_alive.remove(i)
+        #                 enemy_unit = None
+        #                 print(f"the unit died: {enemy_army_tags_alive}")
+        #                 print(f"the defending unit: {self.defender}")
         self.attacking_move = 0
 
     def atttack_animation(self):
@@ -156,6 +158,7 @@ class Attack:
                 canvas.after(400, self.atttack_animation)
 
     def turn_around(self):
+        self.update_hp()
         canvas.itemconfig(self.attacker, image = self.attacker_img)
         id = str(canvas.itemcget(self.attacker, 'image'))
         if self.enemy == -1 and self.attacker_img == str(opposite_healer):
@@ -184,19 +187,10 @@ class Attack:
             self.turn_back()
 
     def lancer_animate(self):
-        # zmen obrazok na motorku
-        # dojdi dole
-        # zmen obrazok na utok motorku
-        # ide hore
-        # zmen obrazok na vracia sa s motorkou
-        # vrati sa na miesto
-        # zmen obrazok na idle lancer
-        # WIDTH//4 * 3 - size[0] * 2
         self.dxl = WIDTH//4 * 3 - size[0] * 2 - self.atk_coords[0]
         self.dyl = HEIGHT - size[1] - 20 - self.atk_coords[1]
         self.return_x = self.atk_coords[0] - (WIDTH//4 * 3 - size[0] * 2)
         self.return_y = self.atk_coords[1] - 30
-        print(self.return_y)
         self.atk_dy = HEIGHT - 50 - size[1]
         self.lancer_move_to()
 
@@ -213,6 +207,7 @@ class Attack:
             self.lancer_attack()
     
     def lancer_attack(self):
+        global my_unit, enemy_unit
         canvas.itemconfig(self.attacker, image = tk_lancer_attack)
         tag = canvas.itemcget(self.attacker, 'tags').split(' ')
         tag = tag[1]
@@ -222,22 +217,11 @@ class Attack:
             canvas.after(20, self.lancer_attack)
         else:
             self.steps = 20
-            print(canvas.coords(self.attacker))
-            for i in self.new_hp:
-                # tags = canvas.itemcget(self.defender, 'tags').split(' ')
-                # items = canvas.find_withtag(tags[1])
-                # # IMPORTANT - hp modifications happen here
-                # hp = self.new_hp[self.defender]
-                # # hp = canvas.itemcget(items[-1], 'text')
-                # canvas.itemconfig(items[-1], text = hp)
-                tags = canvas.itemcget(i, 'tags').split(' ')
-                items = canvas.find_withtag(tags[1])
-                hp = self.new_hp[i]
-                canvas.itemconfig(items[-1], text = hp)
             self.lancer_turn_around()
     
     def lancer_turn_around(self):
         print("lancer returning")
+        self.update_hp()
         self.lancer_move_from()
 
     def lancer_move_from(self):
@@ -245,7 +229,6 @@ class Attack:
         tag = canvas.itemcget(self.attacker, 'tags').split(' ')
         tag = tag[1]
         canvas.move(tag, self.return_x/20, self.return_y/20)
-        print(self.return_y/20)
         self.steps -= 1
         if self.steps > 0:
             canvas.after(50, self.lancer_move_from)
@@ -254,6 +237,24 @@ class Attack:
         
     def lancer_turn_back(self):
         canvas.itemconfig(self.attacker, image = tk_lancer_img)
+    
+    def update_hp(self):
+        global my_unit, enemy_unit
+        for i in self.new_hp:
+                tags = canvas.itemcget(i, 'tags').split(' ')
+                items = canvas.find_withtag(tags[1])
+                hp = self.new_hp[i]
+                canvas.itemconfig(items[-1], text = hp)
+                if int(canvas.itemcget(items[-1], 'text')) <= 0:
+                    canvas.itemconfig(i, image = tk_death_icon)
+                    if self.enemy == -1:
+                        my_army_tags_alive.remove(i)
+                        my_unit = None
+                    else:
+                        enemy_army_tags_alive.remove(i)
+                        enemy_unit = None
+                        print(f"the unit died: {enemy_army_tags_alive}")
+                        print(f"the defending unit: {self.defender}")
 
 
 def attacking_unit(e):
@@ -261,7 +262,7 @@ def attacking_unit(e):
     temp = canvas.find_overlapping(e.x, e.y, e.x+1, e.y+1)[1]
     if canvas.itemcget(temp, 'image') != str(tk_death_icon):
         my_unit = temp
-        print("attacking unit selected")
+        print("attacking unit selected: {}".format(my_unit))
 
 
 def defending_unit(e):
@@ -277,7 +278,9 @@ def attack(e):
     if my_turn:
         print("commencing attack")
         my_turn = False
-        atk = Attack(my_unit, enemy_unit)
+        # do new_hp ide dict novych hp unitov v tvare {id: hp, id2: hp2, ...}
+        new_hp = {2: 48, 11: 94, 14: 5}
+        atk = Attack(my_unit, enemy_unit, new_hp)
         atk.animate()
         canvas.after(4500, enemy_attack)
 
@@ -287,7 +290,9 @@ def enemy_attack():
     global my_turn, running_animation
     attacker = random.choice(enemy_army_tags_alive)
     defender = random.choice(my_army_tags_alive)
-    atk = Attack(attacker, defender)
+    # do new_hp ide dict novych hp unitov v tvare {id: hp, id2: hp2, ...}
+    new_hp = {5: 60, 14: 34}
+    atk = Attack(attacker, defender, new_hp)
     atk.animate()
     my_turn = True
 
