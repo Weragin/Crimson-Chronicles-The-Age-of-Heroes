@@ -29,7 +29,7 @@ def game(my_army_objects: Dict[int, units.Unit], enemy_army_objects: Dict[int, u
         call_stack = [(0, id) for id in my_army_objects]\
                      + [(1, id) for id in enemy_army_objects]
         shuffle(call_stack)
-        
+
         while len(call_stack) > 0:
             attacker = call_stack.pop()
             attacker_id = attacker[1]
@@ -50,7 +50,7 @@ def game(my_army_objects: Dict[int, units.Unit], enemy_army_objects: Dict[int, u
                                         )
 
             # animations:
-            
+
 
 def player_turn(attacker_id, targets_dict, allies_dict, call_stack):
     unit = allies_dict[attacker_id]
@@ -74,7 +74,7 @@ def enemy_turn(unit_id: int,
         targets=[i for i in targets_dict.values()], 
         allies=[i for i in allies_dict.values()]
         )
-    
+
 
 # 3 player_turn(): 
 #  - if the unit is lancer:
@@ -88,4 +88,3 @@ def enemy_turn(unit_id: int,
 # 4 enemy_turn(): 
 #  - call self.hit() with targets = [i for i in my_army_objects.values()]
 #  - return health_dict
-
