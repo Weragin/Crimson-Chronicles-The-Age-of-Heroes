@@ -278,7 +278,7 @@ spacing = WIDTH//6
 hspace = (HEIGHT - tag_height)//5
 wx1 = tag_width * 3 - x//2
 wx2 = tag_width * 3 + x//2
-weapon_stats = [[5, 2, 0, 0, 0, 50], [20, -1, 2, 0, 0, 50], [-15, 5, -2, 0.1, 0, 70], [-20, 6, -5, 0.5, 0, 100], [30, 3, 0, 0, 3, 80]]
+weapon_stats = [[5, 5, 0, 0, 0, 50], [20, -1, 2, 0, 0, 70], [-15, 7, -2, 0.1, 0, 70], [-40, 10, -5, 0.5, 0, 100], [30, 3, 0, 0, 2, 80]]
 for i in range(5):
     temp = weapon_create(wx1, 25 + i*hspace, wx2, 75 + hspace*i, weapon_stats[i], weapon_tags[i])
     weapons[temp] = weapon_stats[i]
