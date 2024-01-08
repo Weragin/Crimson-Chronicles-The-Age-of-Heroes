@@ -1,5 +1,6 @@
 import json
 import random
+import subprocess
 import sys
 import tkinter as tk
 
@@ -11,6 +12,13 @@ import units
 
 def close(e = 0):
     root.withdraw()
+    sys.exit()
+
+
+def game_over():
+    global game_end
+    root.withdraw()
+    subprocess.run([sys.executable, "end.py", game_end])
     sys.exit()
 
 
@@ -29,7 +37,7 @@ def create_army(my_army, x):
                 army_units.append(canvas.create_image(x, HEIGHT - spacing1 - size[-1] * (i + 0.5) - i * size[-1]//3, image = unit_imgs[my_army[i][0]], anchor = 'nw'))
             temp_tag = (enemy1, str(army_units[-1]) + 'e')
             canvas.itemconfig(army_units[-1], tags = temp_tag)
-            hp_create(army_units[-1], unit_stats[my_army[i][0]][0], temp_tag, my_army[i][1])
+            hp_create(army_units[-1], unit_stats[my_army[i][0]][0], temp_tag)
         for i in range(3, len(my_army)):
             if unit_imgs[my_army[i][0]] == tk_healer_img and enemy1 == "enemy_army":
                 army_units.append(canvas.create_image(x + enemy * 2, HEIGHT - spacing2 - size[-1] * (i + 0.5 - 3) - (i-3) * size[-1]//3, image = opposite_healer, anchor = 'nw'))
@@ -37,7 +45,7 @@ def create_army(my_army, x):
                 army_units.append(canvas.create_image(x + enemy * 2, HEIGHT - spacing2 - size[-1] * (i + 0.5 - 3) - (i-3) * size[-1]//3, image = unit_imgs[my_army[i][0]], anchor = 'nw'))
             temp_tag = (enemy1, str(army_units[-1]) + 'e')
             canvas.itemconfig(army_units[-1], tags = temp_tag)
-            hp_create(army_units[-1], unit_stats[my_army[i][0]][0], temp_tag, my_army[i][1])
+            hp_create(army_units[-1], unit_stats[my_army[i][0]][0], temp_tag)
     else:
         spacing = (HEIGHT//150 - 1) * 150 // len(my_army)
         for i in range(len(my_army)):
@@ -47,14 +55,11 @@ def create_army(my_army, x):
                 army_units.append(canvas.create_image(x, HEIGHT - spacing - size[-1] * (i+0.5) - i * size[-1]//3, image = unit_imgs[my_army[i][0]], anchor = 'nw'))
             temp_tag = (enemy1, str(army_units[-1]) + 'e')
             canvas.itemconfig(army_units[-1], tags = temp_tag)
-            hp_create(army_units[-1], unit_stats[my_army[i][0]][0], temp_tag, my_army[i][1])
+            hp_create(army_units[-1], unit_stats[my_army[i][0]][0], temp_tag)
     return army_units
 
 
-def hp_create(unit_id, hp, tag, guns):
-    hp_weapons = [i[0] for i in guns]
-    hp += sum(hp_weapons)
-    hp = max(hp, 1)
+def hp_create(unit_id, hp, tag):
     unit_coords = canvas.coords(unit_id)
     hp_coords = (unit_coords[0], unit_coords[1] - 20)
     canvas.create_image(hp_coords[0], hp_coords[1], image = tk_hp_icon, anchor = 'nw', tags = tag)
@@ -82,8 +87,7 @@ def create_backend_army(army, ids: list[int], unit_stats) -> Dict[int, units.Uni
             case _:
                 # All the other units are essentially the same, so we call the base Unit() constructor for them:
                 army_objects[id] = units.Unit(id, stats[0], stats[1], stats[2], stats[3], stats[4])
-        for weapon in army[i][1]:
-            army_objects[id].equip_weapon(weapon)
+        
 
     return army_objects
 
@@ -126,7 +130,7 @@ class Attack:
     
     def attacking(self):
         global my_unit, enemy_unit
-        self.atttack_animation()
+        self.attack_animation()
         # tags = canvas.itemcget(self.defender, 'tags').split(' ')
         # items = canvas.find_withtag(tags[1])
         # # IMPORTANT - hp modifications happen here
@@ -150,16 +154,16 @@ class Attack:
         #                 print(f"the defending unit: {self.defender}")
         self.attacking_move = 0
 
-    def atttack_animation(self):
+    def attack_animation(self):
         if self.attacking_move < 3:
             if self.enemy == 1:
                 canvas.itemconfig(self.attacker, image = atk_imgs[self.attacker_img][self.attacking_move])
                 self.attacking_move += 1
-                canvas.after(400, self.atttack_animation)
+                canvas.after(400, self.attack_animation)
             else:
                 canvas.itemconfig(self.attacker, image = enemy_atk_imgs[self.attacker_img][self.attacking_move])
                 self.attacking_move += 1
-                canvas.after(400, self.atttack_animation)
+                canvas.after(400, self.attack_animation)
 
     def turn_around(self):
         self.update_hp()
@@ -278,7 +282,7 @@ def defending_unit(e):
 
 
 def attack(e):
-    global my_turn, my_unit, enemy_unit, my_army_objects, enemy_army_objects
+    global my_turn, my_unit, enemy_unit, my_army_objects, enemy_army_objects, game_end
     if my_turn and my_unit and enemy_unit: # Don't attack if not our turn or no units selected
         print("commencing attack")
         my_turn = False
@@ -304,10 +308,13 @@ def attack(e):
         atk = Attack(my_unit, enemy_unit, new_hp)
         atk.animate()
         canvas.after(4500, enemy_attack)
+        if len(enemy_army_objects) == 0:
+            game_end = "win"
+            canvas.after(4700, game_over)
 
 
 def enemy_attack():
-    global my_turn, my_army_objects, enemy_army_objects
+    global my_turn, my_army_objects, enemy_army_objects, game_end
     attacker = random.choice(enemy_army_tags_alive)
 
     # do the attacking part
@@ -329,6 +336,9 @@ def enemy_attack():
     canvas.tag_unbind("my_army", "<ButtonPress-1>")
     canvas.tag_unbind("enemy_army", "<ButtonPress-1>")
     canvas.after(4500, my_turn_start)
+    if len(my_army_objects) == 0:
+        result = "loss"
+        canvas.after(4700, game_over)
 
 
 def my_turn_start():
@@ -336,7 +346,7 @@ def my_turn_start():
     canvas.tag_bind("my_army", "<ButtonPress-1>", attacking_unit)
     canvas.tag_bind("enemy_army", "<ButtonPress-1>", defending_unit)
     my_turn = True
-    
+
 
 root = tk.Tk()
 root.attributes('-fullscreen', True)
@@ -426,8 +436,8 @@ enemy_army_objects = create_backend_army(enemy_army, enemy_army_tags, unit_stats
 my_turn = True
 my_unit = 0
 enemy_unit = 0
+game_end = "win"
 
-# no longer necessary: running_animation = False
 canvas.tag_bind("my_army", "<ButtonPress-1>", attacking_unit)
 canvas.tag_bind("enemy_army", "<ButtonPress-1>", defending_unit)
 root.bind("<Return>", attack)
