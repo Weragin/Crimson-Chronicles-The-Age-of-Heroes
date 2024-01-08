@@ -90,6 +90,7 @@ def create_backend_army(army, ids: list[int], unit_stats) -> Dict[int, units.Uni
                 army_objects[id] = units.Unit(id, stats[0], stats[1], stats[2], stats[3], stats[4])
         for weapon in army[i][1]:
             army_objects[id].equip_weapon(weapon)
+        army_objects[id].check_stats()
 
 
     return army_objects
