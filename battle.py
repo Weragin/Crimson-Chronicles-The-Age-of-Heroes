@@ -62,7 +62,7 @@ def create_backend_army(army, ids: list[int], unit_stats) -> Dict[int, units.Uni
     """
     Backend army setup. 
     
-    :param army: List[List[str, list[list[int]], int], ...]: The army to be created.
+    :param army: List[List[str, list[list[int]], int]] | List[List[str, list[list[int]]]: The army to be created.
     :param unit_stats: dict[str, list[int]]: The stats of the units.
     :return: Dict[int, units.Unit]: The created army identified by ids.
     """
@@ -75,10 +75,11 @@ def create_backend_army(army, ids: list[int], unit_stats) -> Dict[int, units.Uni
         match unit_type:
             case "lancer":
                 # Since the only unit with special behaviour is the lancer, we call a different constructor for him:
-                army_objects[id] = units.Lancer(id, stats[0], stats[1], stats[2], stats[3])
+                army_objects[id] = units.Lancer(id, stats[0], stats[1], stats[2], stats[3], stats[4])
             case _:
                 # All the other units are essentially the same, so we call the base Unit() constructor for them:
-                army_objects[id] = units.Unit(id, stats[0], stats[1], stats[2], stats[3])
+                army_objects[id] = units.Unit(id, stats[0], stats[1], stats[2], stats[3], stats[4])
+        
 
     return army_objects
 
@@ -273,28 +274,65 @@ def defending_unit(e):
 
 
 def attack(e):
-    global my_turn, my_unit, enemy_unit
-    if my_turn:
+    global my_turn, my_unit, enemy_unit, my_army_objects, enemy_army_objects
+    if my_turn and my_unit and enemy_unit: # Don't attack if not our turn or no units selected
         print("commencing attack")
         my_turn = False
-        # do new_hp ide dict novych hp unitov v tvare {id: hp, id2: hp2, ...}
-        new_hp = {2: 48, 11: 94, 14: 5}
+        
+        # do the attacking part
+        attacker_object = my_army_objects[my_unit]
+        if type(attacker_object) == units.Lancer:
+            new_hp = attacker_object.hit(
+                targets=[i for i in enemy_army_objects.values()],
+                allies=[i for i in my_army_objects.values()]
+                )[0]
+        else:
+            new_hp = attacker_object.hit(
+                targets = [enemy_army_objects[enemy_unit]],
+                allies = [i for i in my_army_objects.values()]
+                )[0]
+            
+        # remove the dead units from army objects
+        for i in new_hp:
+            if new_hp[i] == 0:
+                enemy_army_objects.pop(i)
+        # animate
         atk = Attack(my_unit, enemy_unit, new_hp)
         atk.animate()
         canvas.after(4500, enemy_attack)
 
 
-
 def enemy_attack():
-    global my_turn, running_animation
+    global my_turn, my_army_objects, enemy_army_objects
     attacker = random.choice(enemy_army_tags_alive)
-    defender = random.choice(my_army_tags_alive)
-    # do new_hp ide dict novych hp unitov v tvare {id: hp, id2: hp2, ...}
-    new_hp = {5: 60, 14: 34}
+
+    # do the attacking part
+    attacker_object = enemy_army_objects[attacker]
+    new_hp, defender = attacker_object.hit(
+        targets=[i for i in my_army_objects.values()],
+        allies=[i for i in enemy_army_objects.values()]
+        )
+
+    # remove the dead units from army objects
+    for i in new_hp:
+        if new_hp[i] == 0:
+            my_army_objects.pop(i)
+            
+    # animate
     atk = Attack(attacker, defender, new_hp)
     atk.animate()
-    my_turn = True
+    # Don't start turn until after attack animation
+    canvas.tag_unbind("my_army", "<ButtonPress-1>")
+    canvas.tag_unbind("enemy_army", "<ButtonPress-1>")
+    canvas.after(4500, my_turn_start)
 
+
+def my_turn_start():
+    global my_turn
+    canvas.tag_bind("my_army", "<ButtonPress-1>", attacking_unit)
+    canvas.tag_bind("enemy_army", "<ButtonPress-1>", defending_unit)
+    my_turn = True
+    
 
 root = tk.Tk()
 root.attributes('-fullscreen', True)
@@ -381,50 +419,11 @@ print(f"enemy army: {enemy_army_tags}")
 my_army_objects = create_backend_army(army, my_army_tags, unit_stats)
 enemy_army_objects = create_backend_army(enemy_army, enemy_army_tags, unit_stats)
 
-#TODO: turn all of this into a pair of mutually recursive functions that use time.sleep() to regulate whose turn it is
-
-# 1 function main():
-#  - while game_not_over: call_stack = attack_order(<living_units>)
-#      - while call_stack != []: 
-#          - attacker = call_stack.pop()
-#          - if attacker[0] == 0:
-#              - health_dict = player_turn(attacker[1], <armies>, call_stack)
-#          - else:
-#              - health_dict = enemy_turn(attacker[1], <armies>, call_stack)
-#            # do this in player_turn and enemy_turn:
-#          - for i in health_dict:
-#              - if health_dict[i] <= 0:
-#                  - if i in call_stack:
-#                      - call_stack.remove(i)
-#                  - if i in my_army_objects:
-#                      - my_army_objects.remove(i)
-#                  - if i in enemy_army_objects:
-#                      - enemy_army_objects.remove(i)
-#          - do the animatiooons
-#
-
-# 2 attack_order():
-#    generate the order of attacks - a tuple[0/1, id]
-# 2: iteratively call either player_turn() (if t[0]==0) or enemy_turn() (if t[0]==1)
-
-# 3 player_turn(): 
-#  - if the unit is lancer:
-#      - call self.hit() with targets = [i for i in enemy_army_objects.values()]
-#    else:
-#      - bind defending_unit to canvas to the tag "enemy_army"
-#      - call the attacker's self.hit() with 
-#        targets = [enemy_army_object[defending_unit]]
-#  - return health_dict
-
-# 4 enemy_turn(): 
-#  - call self.hit() with targets = [i for i in my_army_objects.values()]
-#  - return health_dict
-
 my_turn = True
-my_unit = None
-enemy_unit = None
+my_unit = 0
+enemy_unit = 0
 
-running_animation = False
+# no longer necessary: running_animation = False
 canvas.tag_bind("my_army", "<ButtonPress-1>", attacking_unit)
 canvas.tag_bind("enemy_army", "<ButtonPress-1>", defending_unit)
 root.bind("<Return>", attack)
