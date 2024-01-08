@@ -53,7 +53,7 @@ class Unit:
 
         # vampirism
         if self.vampirism > 0:
-            self.on_healed(damage_dealt * self.vampirism)
+            self.on_healed(int(damage_dealt * self.vampirism))
             health_points[self.id] = self.health
 
         # healing
@@ -113,7 +113,7 @@ class Lancer(Unit):
 
         # vampirism
         if self.vampirism > 0:
-            self.on_healed(total_damage * self.vampirism)
+            self.on_healed(int(total_damage * self.vampirism))
             health_points[self.id] = self.health
 
         # healing
