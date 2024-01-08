@@ -28,7 +28,7 @@ class Unit:
         self.heal_power = heal_power
 
     def equip_weapon(self, stats: list[int]):
-        self.max_health = stats[0]
+        self.max_health += stats[0]
         self.health += stats[0]
         self.attack += stats[1]
         self.defence += stats[2]
@@ -72,7 +72,7 @@ class Unit:
 
     def on_attacked(self, damage) -> Tuple[int, int, int]:
         original_hp = self.health
-        damage_dealt = max(damage - self.defence, 0)
+        damage_dealt = max(damage - self.defence, 1)
         self.health = max(self.health - damage_dealt, 0)
         damage_dealt = original_hp - self.health
         

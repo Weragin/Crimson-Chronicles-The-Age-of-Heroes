@@ -60,7 +60,7 @@ def create_army(my_army, x):
 
 
 def hp_create(unit_id, hp, tag, guns):
-    hp = max(sum([i[0] for i in guns]), 1)
+    hp = max(sum([i[0] for i in guns]) + hp, 1)
     unit_coords = canvas.coords(unit_id)
     hp_coords = (unit_coords[0], unit_coords[1] - 20)
     canvas.create_image(hp_coords[0], hp_coords[1], image = tk_hp_icon, anchor = 'nw', tags = tag)
@@ -290,7 +290,9 @@ def attack(e):
     if my_turn and my_unit and enemy_unit: # Don't attack if not our turn or no units selected
         print("commencing attack")
         my_turn = False
-        
+        print("BEFORE ATTACK")
+        for i in enemy_army_objects:
+            print(f"id: {i}, hp: {enemy_army_objects[i].health}")
         # do the attacking part
         attacker_object = my_army_objects[my_unit]
         if type(attacker_object) == units.Lancer:
@@ -303,7 +305,9 @@ def attack(e):
                 targets = [enemy_army_objects[enemy_unit]],
                 allies = [i for i in my_army_objects.values()]
                 )[0]
-            
+        print("AFTER")
+        for i in enemy_army_objects:
+            print(f"id: {i}, hp: {enemy_army_objects[i].health}")
         # remove the dead units from army objects
         for i in new_hp:
             if new_hp[i] == 0:
@@ -341,7 +345,7 @@ def enemy_attack():
     canvas.tag_unbind("enemy_army", "<ButtonPress-1>")
     canvas.after(4500, my_turn_start)
     if len(my_army_objects) == 0:
-        result = "loss"
+        game_end = "loss"
         canvas.after(4700, game_over)
 
 

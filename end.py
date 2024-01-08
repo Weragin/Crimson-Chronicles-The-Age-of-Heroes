@@ -18,9 +18,9 @@ HEIGHT = root.winfo_screenheight()
 
 match sys.argv[1]:
     case "win":
-        background = Image.open("pictures/bg/crimson_chronicles.png").resize((WIDTH, HEIGHT))
+        background = Image.open("pictures/end/win.png").resize((WIDTH, HEIGHT))
     case _:
-        background = Image.open("pictures/bg/crimson_chronicles.png").resize((WIDTH, HEIGHT))
+        background = Image.open("pictures/end/loss.png").resize((WIDTH, HEIGHT))
 
 tk_background = ImageTk.PhotoImage(background)
 canvas.create_image(0, 0, image = tk_background, anchor = 'nw')
