@@ -79,7 +79,8 @@ def create_backend_army(army, ids: list[int], unit_stats) -> Dict[int, units.Uni
             case _:
                 # All the other units are essentially the same, so we call the base Unit() constructor for them:
                 army_objects[id] = units.Unit(id, stats[0], stats[1], stats[2], stats[3], stats[4])
-        
+        for weapon in i[1]:
+            army_objects[id].equip_weapon(weapon)
 
     return army_objects
 
