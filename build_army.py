@@ -22,69 +22,80 @@ def next(e = 0):
 
 def Warrior(e):
     global money
-    if money >= 100:
-        money -= 100
-        army.append(["warrior", []])
-        canvas.itemconfig(money_text, text = money)
-        army_add(warrior, small_warrior)
+    cost = unit_stats["warrior"][-1]
+    # if money >= cost:
+    #     money -= cost
+    army.append(["warrior", []])
+        # canvas.itemconfig(money_text, text = money)
+    army_add(warrior, small_warrior, "warrior")
 
 
 
 def Knight(e):
     global money
-    if money >= 120:
-        money -= 120
-        army.append(["knight", []])
-        canvas.itemconfig(money_text, text = money)
-        army_add(knight, small_knight)
+    # cost = unit_stats["knight"][-1]
+    # if money >= cost:
+    #     money -= cost
+    army.append(["knight", []])
+        # canvas.itemconfig(money_text, text = money)
+    army_add(knight, small_knight, "knight")
 
 
 def Vampire(e):
     global money
-    if money >= 140:
-        money -= 140
-        army.append(["vampire", []])
-        canvas.itemconfig(money_text, text = money)
-        army_add(vampire, small_vampire)
+    # cost = unit_stats["vampire"][-1]
+    # if money >= cost:
+    #     money -= cost
+    army.append(["vampire", []])
+        # canvas.itemconfig(money_text, text = money)
+    army_add(vampire, small_vampire, "vampire")
 
 
 def Defender(e):
     global money
-    if money >= 130:
-        money -= 130
-        army.append(["defender", []])
-        canvas.itemconfig(money_text, text = money)
-        army_add(defender, small_defender)
+    # cost = unit_stats["defender"][-1]
+    # if money >= cost:
+    #     money -= cost
+    army.append(["defender", []])
+        # canvas.itemconfig(money_text, text = money)
+    army_add(defender, small_defender, "defender")
 
 
 def Healer(e):
     global money
-    if money >= 100:
-        money -= 100
-        army.append(["healer", []])
-        canvas.itemconfig(money_text, text = money)
-        army_add(healer, small_healer)
+    # cost = unit_stats["healer"][-1]
+    # if money >= cost:
+    #     money -= cost
+    army.append(["healer", []])
+        # canvas.itemconfig(money_text, text = money)
+    army_add(healer, small_healer, 'healer')
 
 
 def Lancer(e):
     global money
-    if money >= 120:
-        money -= 120
-        army.append(["lancer", []])
+    # cost = unit_stats["lancer"][-1]
+    # if money >= cost:
+    #     money -= cost
+    army.append(["lancer", []])
+        # canvas.itemconfig(money_text, text = money)
+    army_add(lancer, small_lancer, "lancer")
+
+
+def army_add(unit, img = None, unit_str = "warrior"):
+    global tag_height, temp, money
+    if len(army) <= 6:
+        cost = unit_stats[unit_str][-1]
+        money -= cost
         canvas.itemconfig(money_text, text = money)
-        army_add(lancer, small_lancer)
+        object_tag = canvas.find_withtag(unit)
+        place = len(army) * 50
+        if img == None:
+            color = canvas.itemcget(object_tag, "fill")
+            temp.append(canvas.create_rectangle(place + 100, tag_height * 3 + 10, place + 120, tag_height * 3 + 30, fill=color, tags=("army")))
+        else:
+            temp.append(canvas.create_image(place + 100, tag_height * 3 + 10, image = img, anchor = tk.NW, tags=("army")))
+        army[-1].append(temp[-1])
 
-
-def army_add(unit, img = None):
-    global tag_height, temp
-    object_tag = canvas.find_withtag(unit)
-    place = len(army) * 50
-    if img == None:
-        color = canvas.itemcget(object_tag, "fill")
-        temp.append(canvas.create_rectangle(place + 100, tag_height * 3 + 10, place + 120, tag_height * 3 + 30, fill=color, tags=("army")))
-    else:
-        temp.append(canvas.create_image(place + 100, tag_height * 3 + 10, image = img, anchor = tk.NW, tags=("army")))
-    army[-1].append(temp[-1])
 
 
 def find_unit(e):
@@ -125,6 +136,7 @@ def add_weapon(e):
 def character_create(x1, y1, x2, y2, stats: list, img = None):
     global icon_tags
     num = 200//6
+    stats[3] = str(stats[3]*100)+'%'
     if img == None:
         character = canvas.create_rectangle(x1, y1, x2, y2, fill="red")
     else:
@@ -132,6 +144,7 @@ def character_create(x1, y1, x2, y2, stats: list, img = None):
     for i in range(len(stats)):
         canvas.create_image(x2, y1 + num * i, image = icon_tags[i], anchor = 'nw')
         canvas.create_text(x2 + 2 * num, y1 + num * i + num//2, text=stats[i], font=('Helvetica 20 bold'))
+    stats[3] = float(stats[3][0:-1])/100
     return character
 
 
@@ -237,7 +250,8 @@ tag_height = HEIGHT//3 - 50
 x = 50
 y = 100
 
-unit_stats = {"warrior": [100, 5, 2, 0, 0, 90], "knight": [120, 7, 2, 0, 0, 100], "vampire": [140, 5, 2, 5, 0, 80], "defender": [130, 5, 5, 0, 0, 150], "healer": [135, 0, 2, 0, 5, 100], "lancer": [120, 7, 2, 0, 0, 90]}
+# hp, atk, def, vamp, heal, cost
+unit_stats = {"warrior": [100, 10, 2, 0, 0, 80], "knight": [120, 12, 3, 0, 0, 100], "vampire": [100, 12, 1, 0.5, 0, 130], "defender": [130, 5, 5, 0, 0, 150], "healer": [100, 1, 2, 0, 4, 100], "lancer": [90, 8, 1, 0, 0, 200]}
 warrior = character_create(x, tag_height - y, 3 * x, tag_height + y, unit_stats["warrior"], tk_warrior_img)
 canvas.tag_bind(warrior, "<ButtonPress-1>", Warrior)
 
