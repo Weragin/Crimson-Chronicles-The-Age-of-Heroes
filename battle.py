@@ -29,7 +29,7 @@ def create_army(my_army, x):
                 army_units.append(canvas.create_image(x, HEIGHT - spacing1 - size[-1] * (i + 0.5) - i * size[-1]//3, image = unit_imgs[my_army[i][0]], anchor = 'nw'))
             temp_tag = (enemy1, str(army_units[-1]) + 'e')
             canvas.itemconfig(army_units[-1], tags = temp_tag)
-            hp_create(army_units[-1], unit_stats[my_army[i][0]][0], temp_tag)
+            hp_create(army_units[-1], unit_stats[my_army[i][0]][0], temp_tag, my_army[i][1])
         for i in range(3, len(my_army)):
             if unit_imgs[my_army[i][0]] == tk_healer_img and enemy1 == "enemy_army":
                 army_units.append(canvas.create_image(x + enemy * 2, HEIGHT - spacing2 - size[-1] * (i + 0.5 - 3) - (i-3) * size[-1]//3, image = opposite_healer, anchor = 'nw'))
@@ -37,7 +37,7 @@ def create_army(my_army, x):
                 army_units.append(canvas.create_image(x + enemy * 2, HEIGHT - spacing2 - size[-1] * (i + 0.5 - 3) - (i-3) * size[-1]//3, image = unit_imgs[my_army[i][0]], anchor = 'nw'))
             temp_tag = (enemy1, str(army_units[-1]) + 'e')
             canvas.itemconfig(army_units[-1], tags = temp_tag)
-            hp_create(army_units[-1], unit_stats[my_army[i][0]][0], temp_tag)
+            hp_create(army_units[-1], unit_stats[my_army[i][0]][0], temp_tag, my_army[i][1])
     else:
         spacing = (HEIGHT//150 - 1) * 150 // len(my_army)
         for i in range(len(my_army)):
@@ -47,11 +47,14 @@ def create_army(my_army, x):
                 army_units.append(canvas.create_image(x, HEIGHT - spacing - size[-1] * (i+0.5) - i * size[-1]//3, image = unit_imgs[my_army[i][0]], anchor = 'nw'))
             temp_tag = (enemy1, str(army_units[-1]) + 'e')
             canvas.itemconfig(army_units[-1], tags = temp_tag)
-            hp_create(army_units[-1], unit_stats[my_army[i][0]][0], temp_tag)
+            hp_create(army_units[-1], unit_stats[my_army[i][0]][0], temp_tag, my_army[i][1])
     return army_units
 
 
-def hp_create(unit_id, hp, tag):
+def hp_create(unit_id, hp, tag, guns):
+    hp_weapons = [i[0] for i in guns]
+    hp += sum(hp_weapons)
+    hp = max(hp, 1)
     unit_coords = canvas.coords(unit_id)
     hp_coords = (unit_coords[0], unit_coords[1] - 20)
     canvas.create_image(hp_coords[0], hp_coords[1], image = tk_hp_icon, anchor = 'nw', tags = tag)
@@ -79,7 +82,7 @@ def create_backend_army(army, ids: list[int], unit_stats) -> Dict[int, units.Uni
             case _:
                 # All the other units are essentially the same, so we call the base Unit() constructor for them:
                 army_objects[id] = units.Unit(id, stats[0], stats[1], stats[2], stats[3], stats[4])
-        for weapon in i[1]:
+        for weapon in army[i][1]:
             army_objects[id].equip_weapon(weapon)
 
     return army_objects
