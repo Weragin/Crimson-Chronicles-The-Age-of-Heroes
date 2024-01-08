@@ -28,12 +28,18 @@ class Unit:
         self.heal_power = heal_power
 
     def equip_weapon(self, stats: list[int]):
-        self.max_health += stats[0]
+        self.max_health = stats[0]
         self.health += stats[0]
         self.attack += stats[1]
         self.defence += stats[2]
         self.vampirism += stats[3]
         self.heal_power += stats[4]
+
+    def check_stats(self):
+        self.max_health = max(1, self.max_health)
+        self.health = self.max_health
+        self.attack = max(0, self.attack)
+        self.heal_power = max(0, self.heal_power)
 
     def hit(self, targets: List["Unit"], allies: List["Unit"]) -> Tuple[dict[int, int], int]:
         """
