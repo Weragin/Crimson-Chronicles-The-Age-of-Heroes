@@ -117,7 +117,6 @@ class Attack:
         if is_lancer != str(tk_lancer_img):
             self.move_to()
         else:
-            print("lancer attack")
             self.lancer_animate()
 
     def move_to(self):
@@ -177,7 +176,6 @@ class Attack:
             canvas.itemconfig(self.attacker, image = tk_healer_img)
         else:
             canvas.itemconfig(self.attacker, image = opposite_img[id])
-        print(canvas.itemcget(self.attacker, 'image'))
         self.move_from()
 
     def turn_back(self):
@@ -232,7 +230,6 @@ class Attack:
             self.lancer_turn_around()
     
     def lancer_turn_around(self):
-        print("lancer returning")
         self.update_hp()
         self.lancer_move_from()
 
@@ -265,8 +262,6 @@ class Attack:
                     else:
                         enemy_army_tags_alive.remove(i)
                         enemy_unit = None
-                        print(f"the unit died: {enemy_army_tags_alive}")
-                        print(f"the defending unit: {self.defender}")
 
 
 def attacking_unit(e):
@@ -274,7 +269,6 @@ def attacking_unit(e):
     temp = canvas.find_overlapping(e.x, e.y, e.x+1, e.y+1)[1]
     if canvas.itemcget(temp, 'image') != str(tk_death_icon):
         my_unit = temp
-        print("attacking unit selected: {}".format(my_unit))
 
 
 def defending_unit(e):
@@ -282,17 +276,12 @@ def defending_unit(e):
     temp = canvas.find_overlapping(e.x, e.y, e.x+1, e.y+1)[1]
     if canvas.itemcget(temp, 'image') != str(tk_death_icon):
         enemy_unit = temp
-        print("defending unit selected: {}".format(enemy_unit))
 
 
 def attack(e):
     global my_turn, my_unit, enemy_unit, my_army_objects, enemy_army_objects, game_end
     if my_turn and my_unit and enemy_unit: # Don't attack if not our turn or no units selected
-        print("commencing attack")
         my_turn = False
-        print("BEFORE ATTACK")
-        for i in enemy_army_objects:
-            print(f"id: {i}, hp: {enemy_army_objects[i].health}")
         # do the attacking part
         attacker_object = my_army_objects[my_unit]
         if type(attacker_object) == units.Lancer:
@@ -305,9 +294,6 @@ def attack(e):
                 targets = [enemy_army_objects[enemy_unit]],
                 allies = [i for i in my_army_objects.values()]
                 )[0]
-        print("AFTER")
-        for i in enemy_army_objects:
-            print(f"id: {i}, hp: {enemy_army_objects[i].health}")
         # remove the dead units from army objects
         for i in new_hp:
             if new_hp[i] == 0:
@@ -424,7 +410,6 @@ army = json.loads(army)
 
 unit_stats = sys.argv[2]
 unit_stats = json.loads(unit_stats)
-print(f"unit_stats: {unit_stats}")
 # stats- hp, atk, def, vamp, heal, cost
 
 my_army_tags = create_army(army, WIDTH//4)
@@ -434,8 +419,6 @@ enemy_army = [['vampire', [[-15, 5, -2, 0.1, 0, 70]]], ['vampire', [[-15, 5, -2,
 enemy_army_tags = create_army(enemy_army, WIDTH//4 * 3 - size[0])
 
 enemy_army_tags_alive = [i for i in enemy_army_tags]
-print(f"army tags: {my_army_tags}")
-print(f"enemy army: {enemy_army_tags}")
 
 # backend representation of the armies
 my_army_objects = create_backend_army(army, my_army_tags, unit_stats)
