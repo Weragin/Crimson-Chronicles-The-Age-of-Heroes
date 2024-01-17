@@ -5,7 +5,6 @@ import tkinter as tk
 
 from PIL import Image, ImageTk
 
-# canvas_dimensions = []
 
 def close(e = 0):
     root.withdraw()
@@ -21,67 +20,37 @@ def next(e = 0):
 
 
 def Warrior(e):
-    global money
-    cost = unit_stats["warrior"][-1]
-    # if money >= cost:
-    #     money -= cost
     army.append(["warrior", []])
-        # canvas.itemconfig(money_text, text = money)
     army_add(warrior, small_warrior, "warrior")
 
 
-
 def Knight(e):
-    global money
-    # cost = unit_stats["knight"][-1]
-    # if money >= cost:
-    #     money -= cost
     army.append(["knight", []])
-        # canvas.itemconfig(money_text, text = money)
     army_add(knight, small_knight, "knight")
 
 
 def Vampire(e):
-    global money
-    # cost = unit_stats["vampire"][-1]
-    # if money >= cost:
-    #     money -= cost
     army.append(["vampire", []])
-        # canvas.itemconfig(money_text, text = money)
     army_add(vampire, small_vampire, "vampire")
 
 
 def Defender(e):
-    global money
-    # cost = unit_stats["defender"][-1]
-    # if money >= cost:
-    #     money -= cost
     army.append(["defender", []])
-        # canvas.itemconfig(money_text, text = money)
     army_add(defender, small_defender, "defender")
 
 
 def Healer(e):
-    global money
-    # cost = unit_stats["healer"][-1]
-    # if money >= cost:
-    #     money -= cost
     army.append(["healer", []])
-        # canvas.itemconfig(money_text, text = money)
     army_add(healer, small_healer, 'healer')
 
 
 def Lancer(e):
-    global money
-    # cost = unit_stats["lancer"][-1]
-    # if money >= cost:
-    #     money -= cost
     army.append(["lancer", []])
-        # canvas.itemconfig(money_text, text = money)
     army_add(lancer, small_lancer, "lancer")
 
 
 def army_add(unit, img = None, unit_str = "warrior"):
+    img = img or small_warrior
     global tag_height, temp, money
     if len(army) <= 6:
         cost = unit_stats[unit_str][-1]
@@ -89,11 +58,7 @@ def army_add(unit, img = None, unit_str = "warrior"):
         canvas.itemconfig(money_text, text = money)
         object_tag = canvas.find_withtag(unit)
         place = len(army) * 50
-        if img == None:
-            color = canvas.itemcget(object_tag, "fill")
-            temp.append(canvas.create_rectangle(place + 100, tag_height * 3 + 10, place + 120, tag_height * 3 + 30, fill=color, tags=("army")))
-        else:
-            temp.append(canvas.create_image(place + 100, tag_height * 3 + 10, image = img, anchor = tk.NW, tags=("army")))
+        temp.append(canvas.create_image(place + 100, tag_height * 3 + 10, image = img, anchor = tk.NW, tags=("army")))
         army[-1].append(temp[-1])
 
 
@@ -103,19 +68,11 @@ def find_unit(e):
     overlap = canvas.find_overlapping(e.x, e.y, e.x+1, e.y+1)
     size = 5
     temp = [i[-1] for i in army]
-    try:
-        if selected_unit != "":
-            x1, y1, x2, y2 = canvas.coords(temp[selected_unit])
-            canvas.coords(temp[selected_unit], x1 + size, y1 + size, x2 - size, y2 - size)
-        x1, y1, x2, y2 = canvas.coords(overlap[1])
-        selected_unit = temp.index(overlap[1])
-        canvas.coords(overlap[1], x1 - size, y1 - size, x2 + size, y2 + size)
-    except:
-        if selected_unit != "":
-            canvas.delete(select_rectangle)
-        x1, y1 = canvas.coords(overlap[1])
-        selected_unit = temp.index(overlap[1])
-        select_rectangle = canvas.create_rectangle(x1 - size, y1 - size, x1 + W + size, y1 + H + size, fill=None, outline="green", width=2)
+    if selected_unit != "":
+        canvas.delete(select_rectangle)
+    x1, y1 = canvas.coords(overlap[1])
+    selected_unit = temp.index(overlap[1])
+    select_rectangle = canvas.create_rectangle(x1 - size, y1 - size, x1 + W + size, y1 + H + size, fill=None, outline="green", width=2)
         
 
 def add_weapon(e):
@@ -134,13 +91,11 @@ def add_weapon(e):
 
 
 def character_create(x1, y1, x2, y2, stats: list, img = None):
+    img = img or tk_warrior_img
     global icon_tags
     num = 200//6
     stats[3] = str(stats[3]*100)+'%'
-    if img == None:
-        character = canvas.create_rectangle(x1, y1, x2, y2, fill="red")
-    else:
-        character = canvas.create_image(x1, y1, image = img, anchor = tk.NW, tags="images")
+    character = canvas.create_image(x1, y1, image = img, anchor = tk.NW, tags="images")
     for i in range(len(stats)):
         canvas.create_image(x2, y1 + num * i, image = icon_tags[i], anchor = 'nw')
         canvas.create_text(x2 + 2 * num, y1 + num * i + num//2, text=stats[i], font=('Helvetica 20 bold'))
@@ -149,17 +104,15 @@ def character_create(x1, y1, x2, y2, stats: list, img = None):
 
 
 def weapon_create(x1, y1, x2 = None, y2 = None, stats = [0, 0, 0, 0, 0, 0], img = None):
+    # img sets default img to sword img
+    img = img or weapon_tags[0]
     global HEIGHT, WIDTH, tag_width, small_icon_tags
     s = ["hp", "atk", "def", "vamp", "heal", "cost"]
     stats[3] = str(stats[3]*100)+'%'
     num = (y2 - y1)//2
-    if img == None:
-        weapon = canvas.create_rectangle(x1, y1, x2, y2, fill="yellow", tags="weapons")
-    else:
-        weapon = canvas.create_image(x1, y1, image = img, anchor = 'nw', tags = "weapons")
+    weapon = canvas.create_image(x1, y1, image = img, anchor = 'nw', tags = "weapons")
     for i in range(2):
         for j in range(3):
-            # canvas.create_rectangle(x2 + num * i * 2.5, y1 + num * j, x2 + num * (i+1) + num * i * 1.5, y1 + num * (j+1), fill="red")
             canvas.create_image(x2 + num * i * 2.5, y1 + num * j, image = small_icon_tags[j+3*i], anchor = 'nw')
             canvas.create_text(x2 + num * (i + 1.7) + num * i * 2, (y1 + y2)//2 - (y2 - y1)//4 + num * j, text=stats[j+3*i], font=("Helvetica 16 bold"))
     stats[3] = float(stats[3][0:-1])/100
@@ -170,52 +123,60 @@ def canvas_size(e):
     global WIDTH, HEIGHT
     WIDTH = e.width
     HEIGHT = e.height
-    # canvas_dimensions.append(width)
-    # canvas_dimensions.append(height)
 
 
 root = tk.Tk()
 root.attributes('-fullscreen', True)
 
-W = 30
-H = 60
-warrior_img = Image.open("pictures/warrior.png")
+WIDTH = int(sys.argv[1])
+HEIGHT = int(sys.argv[2])
+
+x = int(WIDTH//25)          # 50
+y = int(HEIGHT//7.2)        # 100
+print(x, y)
+
+pic_x = int(WIDTH//12.8)    # 100
+pic_y = int(HEIGHT//3.6)    # 200
+W = int(WIDTH//42.6)
+H = int(HEIGHT//12)
+warrior_img = Image.open("pictures/warrior.png").resize((pic_x, pic_y))
 small_warrior = warrior_img.resize((W, H))
 small_warrior = ImageTk.PhotoImage(small_warrior)
 tk_warrior_img = ImageTk.PhotoImage(warrior_img)
 
-knight_img = Image.open("pictures/knight.png")
+knight_img = Image.open("pictures/knight.png").resize((pic_x, pic_y))
 tk_knight_img = ImageTk.PhotoImage(knight_img)
 small_knight = knight_img.resize((W, H))
 small_knight = ImageTk.PhotoImage(small_knight)
 
-vampire_img = Image.open("pictures/vampire.png")
+vampire_img = Image.open("pictures/vampire.png").resize((pic_x, pic_y))
 tk_vampire_img = ImageTk.PhotoImage(vampire_img)
 small_vampire = vampire_img.resize((W, H))
 small_vampire = ImageTk.PhotoImage(small_vampire)
 
-defender_img = Image.open("pictures/defender.png")
+defender_img = Image.open("pictures/defender.png").resize((pic_x, pic_y))
 tk_defender_img = ImageTk.PhotoImage(defender_img)
 small_defender = defender_img.resize((W, H))
 small_defender = ImageTk.PhotoImage(small_defender)
 
-healer_img = Image.open("pictures/healer.png")
+healer_img = Image.open("pictures/healer.png").resize((pic_x, pic_y))
 tk_healer_img = ImageTk.PhotoImage(healer_img)
 small_healer = healer_img.resize((W, H))
 small_healer = ImageTk.PhotoImage(small_healer)
 
-lancer_img = Image.open("pictures/lancer.png")
+lancer_img = Image.open("pictures/lancer.png").resize((pic_x, pic_y))
 tk_lancer_img = ImageTk.PhotoImage(lancer_img)
 small_lancer = lancer_img.resize((W, H))
 small_lancer = ImageTk.PhotoImage(small_lancer)
 
+icon_size = int(WIDTH//51.2)        # 25
 icon_names = ["pictures/icons/heart.png", "pictures/icons/attack.png", "pictures/icons/defense.png", "pictures/icons/vampirsm.png", "pictures/icons/heal.png", "pictures/icons/price.png"]
 icon_tags = []
 small_icon_tags = []
 for i in icon_names:
     icon_img = Image.open(i)
     icon_tags.append(ImageTk.PhotoImage(icon_img))
-    small_icon = icon_img.resize((25, 25))
+    small_icon = icon_img.resize((icon_size, icon_size))
     small_icon_tags.append(ImageTk.PhotoImage(small_icon))
 
 weapon_file = ["pictures/weapons/sword.png", "pictures/weapons/shield.png", "pictures/weapons/axe.png", "pictures/weapons/katana.png", "pictures/weapons/magic_wand.png"]
@@ -229,8 +190,6 @@ for i in weapon_file:
 
 canvas = tk.Canvas(root, bg='white', highlightthickness=0)
 canvas.pack(fill=tk.BOTH, expand=True)
-WIDTH = int(sys.argv[1])
-HEIGHT = int(sys.argv[2])
 
 background = Image.open("pictures/bg/build_army_bg.png").resize((WIDTH, HEIGHT))
 tk_background = ImageTk.PhotoImage(background)
@@ -246,9 +205,6 @@ money_text = canvas.create_text(WIDTH - 100, 50, text=money, fill="black", font=
 
 tag_width = (WIDTH - 300)//3
 tag_height = HEIGHT//3 - 50
-
-x = 50
-y = 100
 
 # hp, atk, def, vamp, heal, cost
 unit_stats = {"warrior": [100, 10, 2, 0, 0, 80], "knight": [120, 12, 3, 0, 0, 100], "vampire": [100, 12, 1, 0.5, 0, 130], "defender": [130, 5, 5, 0, 0, 150], "healer": [100, 1, 2, 0, 4, 100], "lancer": [90, 8, 1, 0, 0, 200]}
