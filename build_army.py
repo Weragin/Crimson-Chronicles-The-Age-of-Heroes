@@ -169,16 +169,19 @@ tk_lancer_img = ImageTk.PhotoImage(lancer_img)
 small_lancer = lancer_img.resize((W, H))
 small_lancer = ImageTk.PhotoImage(small_lancer)
 
+icon_large_size = int(WIDTH//38.44) # 33.33
 icon_size = int(WIDTH//51.2)        # 25
 icon_names = ["pictures/icons/heart.png", "pictures/icons/attack.png", "pictures/icons/defense.png", "pictures/icons/vampirsm.png", "pictures/icons/heal.png", "pictures/icons/price.png"]
 icon_tags = []
 small_icon_tags = []
 for i in icon_names:
-    icon_img = Image.open(i)
+    icon_img = Image.open(i).resize((icon_large_size, icon_large_size))
     icon_tags.append(ImageTk.PhotoImage(icon_img))
     small_icon = icon_img.resize((icon_size, icon_size))
     small_icon_tags.append(ImageTk.PhotoImage(small_icon))
 
+small_weapon_size = ((int(WIDTH//51.2), int(HEIGHT//19.46)))         # 25, 37
+weapon_size = ((int(WIDTH//25.6), int(HEIGHT//9.6)))                        # 50 x 75
 weapon_file = ["pictures/weapons/sword.png", "pictures/weapons/shield.png", "pictures/weapons/axe.png", "pictures/weapons/katana.png", "pictures/weapons/magic_wand.png"]
 weapon_tags = []
 small_weapon_tags = {}
